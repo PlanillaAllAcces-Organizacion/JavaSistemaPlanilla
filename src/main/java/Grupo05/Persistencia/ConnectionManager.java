@@ -1,5 +1,6 @@
 package Grupo05.Persistencia;
 
+<<<<<<< HEAD
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -66,3 +67,7 @@ public class ConnectionManager {
         return instance;
     }
 }
+=======
+public class ConnectionManager {
+}
+>>>>>>> 506f77a769c2ba64ac4b3057768d78a6c3c4c8bf
