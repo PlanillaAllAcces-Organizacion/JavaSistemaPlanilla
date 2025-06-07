@@ -1,5 +1,7 @@
 package Grupo05.dominio;
-
+import Grupo05.Formularios.PuestosTrabajoListForm;
+import javax.swing.*;
+import java.awt.event.WindowAdapter;
 import java.math.BigDecimal;
 
 public class PuestoTrabajo {
@@ -22,6 +24,17 @@ public class PuestoTrabajo {
         this.valorExtra = valorExtra;
         this.estado = estado;
     }
+    
+    public PuestoTrabajo(PuestosTrabajoListForm puestosTrabajoListForm) {
+    }
+
+    public PuestoTrabajo(PuestosTrabajoListForm puestosTrabajoListForm, PuestoTrabajo puesto) {
+    }
+
+    public PuestoTrabajo(JFrame parentWindow) {
+    }
+
+
 
     // Getters y Setters
     public int getId() {
@@ -100,4 +113,5 @@ public class PuestoTrabajo {
                 ", estado=" + getStrEstado() +
                 '}';
     }
+
 }
