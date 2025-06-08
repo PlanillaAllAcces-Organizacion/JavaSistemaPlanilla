@@ -37,5 +37,24 @@ public class MainForm extends JFrame {
             empleadoReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
         });
 
+
+
+        // Nuevo ítem para Bonos
+        JMenuItem itemBonos = new JMenuItem("Bonos"); // Crea un nuevo elemento de menú llamado "Bonos".
+        menuMantenimiento.add(itemBonos); // Agrega el elemento "Bonos" al menú "Mantenimientos".
+        itemBonos.addActionListener(e -> { // Agrega un ActionListener al elemento "Bonos".
+            BonoListForm bonoListForm = new BonoListForm(); // Crea una nueva instancia de BonoListForm
+            bonoListForm.setVisible(true); // Hace visible el formulario de gestión de bonos
+        });
+
+
+        JMenuItem ítemDescuentos = new JMenuItem("Descuentos");
+        menuMantenimiento.add(ítemDescuentos);
+        ítemDescuentos.addActionListener(e -> {
+           DescuentoListForm descuentoListForm = new DescuentoListForm();
+           descuentoListForm.setVisible(true);
+        });
+
+
     }
 }
