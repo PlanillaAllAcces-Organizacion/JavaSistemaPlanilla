@@ -6,12 +6,12 @@ import java.sql.SQLException;
 
 public class ConnectionManager {
 
-    private static final String  STR_CONNECTION = "jdbc:sqlserver://JC39012\\SQLEXPRESS; "+
+    private static final String  STR_CONNECTION = "jdbc:sqlserver://HP_JOEL\\SQLEXPRESS; "+
             "encrypt=true; " +
-            "database=Paysheet1; " +
+            "database=Paysheet2; " +
             "trustServerCertificate=true;" +
-            "user=java2025;" +
-            "password=12345";
+            "user=java032025;" +
+            "password=jvg123";
 
 
     private Connection connection;
