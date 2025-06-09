@@ -1,6 +1,7 @@
 package Grupo05.Persistencia;
 
 public class Descuento {
+
     private int id;
     private String nombre;
     private double valor;

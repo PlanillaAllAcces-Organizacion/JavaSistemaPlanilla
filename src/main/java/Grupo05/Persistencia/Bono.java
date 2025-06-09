@@ -1,6 +1,7 @@
 package Grupo05.Persistencia;
 
 public class Bono {
+
     private int id;
     private String nombreBono;
     private double valor;
@@ -83,3 +84,5 @@ public class Bono {
                 '}';
     }
 }
+
+
