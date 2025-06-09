@@ -55,6 +55,13 @@ public class MainForm extends JFrame {
            descuentoListForm.setVisible(true);
         });
 
+        JMenuItem ítemHorario = new JMenuItem("Horario");
+        menuMantenimiento.add(ítemHorario);
+        ítemHorario.addActionListener(e -> {
+            TipoDeHorarioListForm descuentoListForm = new TipoDeHorarioListForm();
+            descuentoListForm.setVisible(true);
+        });
+
 
     }
 }
