@@ -7,14 +7,14 @@ import Grupo05.Persistencia.TipoHorarioDAO;
 import Grupo05.Utils.CUD;
 import Grupo05.Utils.ComBo;
 import Grupo05.dominio.Empleado;
-import Grupo05.dominio.PuestoTrabajo;
 import Grupo05.dominio.Horario;
+import Grupo05.dominio.PuestoTrabajo;
 
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.util.List;
+import java.util.ArrayList;
+
 
 public class EmpleadosForm extends JDialog{
     private JTextField txtDui;
@@ -34,369 +34,281 @@ public class EmpleadosForm extends JDialog{
     private JLabel lbPassword;
     private JPasswordField txtPassword;
 
+    private EmpleadoDAO empleadoDAO; // Instancia de EmpleadoDAO
     private TipoHorarioDAO tipoHorarioDAO;
     private PuestoTrabajoDAO puestoTrabajoDAO;
-    private EmpleadoDAO empleadoDAO;
-    private Empleado em;
-    private CUD cud;
-    private MainForm mainForm;
+    private MainForm mainForm; // Referencia a la ventana principal
+    private CUD cud; // Tipo de operación (CREATE, UPDATE, DELETE)
+    private Empleado en; // Objeto Empleado que se está manipulando
 
-    public EmpleadosForm(MainForm mainForm, CUD cud, Empleado empleado){
+    // Constructor de la clase EmpleadoForm
+    public EmpleadosForm(MainForm mainForm, CUD cud, Empleado empleado) {
         this.cud = cud;
-        this.em = empleado;
+        this.en = empleado;
         this.mainForm = mainForm;
-
-        empleadoDAO = new EmpleadoDAO();
+        empleadoDAO = new EmpleadoDAO(); // Crea una nueva instancia de EmpleadoDAO
+        tipoHorarioDAO = new TipoHorarioDAO();       // <--- ¡AGREGA ESTO! (O new TipoHorarioDAO() si así la llamaste)
         puestoTrabajoDAO = new PuestoTrabajoDAO();
-        tipoHorarioDAO = new TipoHorarioDAO();
         setContentPane(mainPanel);
         setModal(true);
-        init();
+        init(); // Llama al método 'init' para inicializar el formulario
         pack();
         setLocationRelativeTo(mainForm);
 
         BtnCancelar.addActionListener(s -> this.dispose());
         BtnGuardar.addActionListener(s -> ok());
+        txtFecha.setEditable(false);
     }
 
     private void init() {
-        initCBStatus();
-        initCBPuesto();
-        initCBHorario();
+        initCBEstado(); // Inicializa el ComboBox de estado
+        initCBsAdicionales(); // Inicializa los ComboBoxes adicionales
 
         switch (this.cud) {
             case CREATE:
-                setTitle("Crear Usuario");
+                setTitle("Crear Empleado");
                 BtnGuardar.setText("Guardar");
                 break;
             case UPDATE:
-                setTitle("Modificar Usuario");
+                setTitle("Modificar Empleado");
                 BtnGuardar.setText("Guardar");
                 break;
             case DELETE:
-                setTitle("Eliminar Usuario");
+                setTitle("Eliminar Empleado");
                 BtnGuardar.setText("Eliminar");
                 break;
         }
 
-        setValuesControls(this.em);
+        setValuesControls(this.en); // Llena los campos con los valores del empleado
     }
 
-    private void initCBStatus() {
+    private void initCBEstado() {
         DefaultComboBoxModel<ComBo> model = (DefaultComboBoxModel<ComBo>) cbEstado.getModel();
         model.addElement(new ComBo("ACTIVO", (byte)1));
         model.addElement(new ComBo("INACTIVO", (byte)2));
     }
 
-    private void initCBPuesto() {
-        DefaultComboBoxModel<ComBo> model = (DefaultComboBoxModel<ComBo>) cbPuesto.getModel();
-        model.removeAllElements();
-        model.addElement(new ComBo("Ninguno", 0));
+    // Método para inicializar ComboBoxes adicionales (Tipo de Horario, Puesto de Trabajo)
+    private void initCBsAdicionales() {
+        // --- ComboBox Tipo de Horario ---
+        DefaultComboBoxModel<ComBo> modelHorario = (DefaultComboBoxModel<ComBo>) cbHorario.getModel();
+        modelHorario.removeAllElements(); // Limpiar elementos previos por si acaso
 
         try {
-            List<PuestoTrabajo> puestos = puestoTrabajoDAO.getAllActive();
-            for (PuestoTrabajo p : puestos) {
-                model.addElement(new ComBo(p.getNombrePuesto(), p.getId()));
-            }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar puestos: " + e.getMessage(), "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
-        }
-    }
-
-    private void initCBHorario() {
-        DefaultComboBoxModel<ComBo> model = (DefaultComboBoxModel<ComBo>) cbHorario.getModel();
-        model.removeAllElements();
-        model.addElement(new ComBo("Ninguno", 0));
-
-        try {
-            List<Horario> horarios = tipoHorarioDAO.getAll();
+            ArrayList<Horario> horarios = tipoHorarioDAO.getAll();
             for (Horario h : horarios) {
-                model.addElement(new ComBo(h.getNombreHorario(), h.getId()));
+                modelHorario.addElement(new ComBo(h.getNombreHorario(), h.getId()));
             }
-        } catch (SQLException e) {
-            JOptionPane.showMessageDialog(this, "Error al cargar horarios: " + e.getMessage(), "Error de Base de Datos", JOptionPane.ERROR_MESSAGE);
-            e.printStackTrace();
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar tipos de horario: " + ex.getMessage(),
+                    "Error de Carga", JOptionPane.ERROR_MESSAGE);
+        }
+
+        // --- ComboBox Puesto de Trabajo ---
+        DefaultComboBoxModel<ComBo> modelPuesto = (DefaultComboBoxModel<ComBo>) cbPuesto.getModel();
+        modelPuesto.removeAllElements(); // Limpiar elementos previos
+
+        try {
+            ArrayList<PuestoTrabajo> puestos = puestoTrabajoDAO.getAllActive();
+            for (PuestoTrabajo p : puestos) {
+                modelPuesto.addElement(new ComBo(p.getNombrePuesto(), p.getId()));
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error al cargar puestos de trabajo: " + ex.getMessage(),
+                    "Error de Carga", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+
 
     private void setValuesControls(Empleado empleado) {
-        // Asegúrate de que 'empleado' no sea null antes de acceder a sus propiedades
-        if (empleado != null) {
-            txtDui.setText(empleado.getDui()); // <-- AÑADIDO PARA DEPURACIÓN, asegúrate de que se cargue si es UPDATE/DELETE
-            txtNombre.setText(empleado.getNombre());
-            txtApellido.setText(empleado.getApellido()); // <-- AÑADIDO PARA DEPURACIÓN
-            txtCorreo.setText(empleado.getCorreo());
-            txtTelefono.setText(String.valueOf(empleado.getTelefono())); // <-- AÑADIDO PARA DEPURACIÓN
-            txtSalario.setText(String.valueOf(empleado.getSalario())); // <-- AÑADIDO PARA DEPURACIÓN
-            // Formatear la fecha para mostrarla
-            if (empleado.getFechacontra() != null) {
-                txtFecha.setText(empleado.getFechacontra().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))); // <-- AÑADIDO PARA DEPURACIÓN
-            }
-            txtUsuario.setText(empleado.getUsuario()); // <-- AÑADIDO PARA DEPURACIÓN
+        if (empleado == null) return; // Si el empleado es nulo, no hay nada que mostrar
 
-            // Seleccionar el estatus en el ComboBox 'cbStatus'.
-            // Recorre el modelo para encontrar el ComBo correcto por su valor.
-            DefaultComboBoxModel<ComBo> estadoModel = (DefaultComboBoxModel<ComBo>) cbEstado.getModel();
-            for (int i = 0; i < estadoModel.getSize(); i++) {
-                ComBo item = estadoModel.getElementAt(i);
-                if (item.getValue() instanceof Byte && item.getValue().equals(empleado.getEstado())) {
-                    cbEstado.setSelectedItem(item);
-                    break;
-                }
-            }
-
-            // Seleccionar puesto
-            DefaultComboBoxModel<ComBo> puestoModel = (DefaultComboBoxModel<ComBo>) cbPuesto.getModel();
-            if (empleado.getPuestoTrabajoId() != null) {
-                for (int i = 0; i < puestoModel.getSize(); i++) {
-                    ComBo item = puestoModel.getElementAt(i);
-                    if (item.getValue() instanceof Integer && item.getValue().equals(empleado.getPuestoTrabajoId())) {
-                        cbPuesto.setSelectedItem(item);
-                        break;
-                    }
-                }
-            } else {
-                cbPuesto.setSelectedItem(new ComBo("Ninguno", 0)); // Seleccionar "Ninguno" si es null
-            }
+        txtNombre.setText(empleado.getNombre());
+        txtApellido.setText(empleado.getApellido());
+        txtDui.setText(empleado.getDui());
+        txtTelefono.setText(String.valueOf(empleado.getTelefono()));
+        txtCorreo.setText(empleado.getCorreo());
+        txtSalario.setText(String.valueOf(empleado.getSalario()));
 
 
-            // Seleccionar horario
-            DefaultComboBoxModel<ComBo> horarioModel = (DefaultComboBoxModel<ComBo>) cbHorario.getModel();
-            if (empleado.getTipoDeHorarioId() != null) {
-                for (int i = 0; i < horarioModel.getSize(); i++) {
-                    ComBo item = horarioModel.getElementAt(i);
-                    if (item.getValue() instanceof Integer && item.getValue().equals(empleado.getTipoDeHorarioId())) {
-                        cbHorario.setSelectedItem(item);
-                        break;
-                    }
-                }
-            } else {
-                cbHorario.setSelectedItem(new ComBo("Ninguno", 0)); // Seleccionar "Ninguno" si es null
-            }
+        // Manejo de la fecha de contrato
+        if (this.cud == CUD.CREATE) {
+            // Para una nueva creación, obtener la fecha y hora actual de la computadora
+            LocalDateTime now = LocalDateTime.now();
+            // Formatear al String deseado para mostrar en el campo
+            txtFecha.setText(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")));
+            // Y también establecerla en el objeto Empleado directamente para que getValuesControls la tenga
+            this.en.setFechacontra(now);
+        } else {
+            // Para actualización o eliminación, mostrar la fecha de contrato existente
+            txtFecha.setText(empleado.getFechacontra() != null ?
+                    empleado.getFechacontra().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : "");
         }
+
+        txtUsuario.setText(empleado.getUsuario());
+
+        // Seleccionar estado en ComboBox
+        cbEstado.setSelectedItem(new ComBo(null, empleado.getEstado()));
+
+        // Seleccionar Tipo de Horario en ComboBox
+        cbHorario.setSelectedItem(new ComBo(null, empleado.getTipoDeHorarioId()));
+
+        // Seleccionar Puesto de Trabajo en ComboBox
+        cbPuesto.setSelectedItem(new ComBo(null, empleado.getPuestoTrabajoId()));
 
 
         if (this.cud == CUD.CREATE) {
-            cbEstado.setSelectedItem(new ComBo(null, (byte)1)); // Asegura que el estado por defecto sea Activo
-            // Asegúrate de que los campos de puesto y horario también tengan valores por defecto si los deseas
-            cbPuesto.setSelectedItem(new ComBo("Ninguno", 0));
-            cbHorario.setSelectedItem(new ComBo("Ninguno", 0));
+            cbEstado.setSelectedItem(new ComBo(null, (byte)1)); // Por defecto Activo
+            // No se necesita cargar password, se ingresa uno nuevo
         }
 
         if (this.cud == CUD.DELETE) {
-            txtDui.setEditable(false);
+            // Deshabilitar todos los campos para la eliminación
             txtNombre.setEditable(false);
             txtApellido.setEditable(false);
-            txtCorreo.setEditable(false);
+            txtDui.setEditable(false);
             txtTelefono.setEditable(false);
+            txtCorreo.setEditable(false);
             txtSalario.setEditable(false);
-            txtFecha.setEditable(false);
             txtUsuario.setEditable(false);
+            txtPassword.setVisible(false); // Ocultar campo de password
+            lbPassword.setVisible(false); // Ocultar etiqueta de password
             cbEstado.setEnabled(false);
-            cbPuesto.setEnabled(false);
             cbHorario.setEnabled(false);
-            txtPassword.setEditable(false); // También deshabilitar la contraseña en DELETE
+            cbPuesto.setEnabled(false);
         }
 
+        // Si no es creación, ocultar campo de contraseña (ya que no se edita directamente aquí)
         if (this.cud != CUD.CREATE) {
             txtPassword.setVisible(false);
             lbPassword.setVisible(false);
         }
     }
 
-    private void ok() {
-        System.out.println("Formulario - ok: Iniciando operación..."); // <-- AÑADIDO PARA DEPURACIÓN
-        try {
-            boolean res = getValuesControls();
-            System.out.println("Formulario - ok: Validación de controles: " + res); // <-- AÑADIDO PARA DEPURACIÓN
+    private boolean getValuesControls() {
+        // Obtener valores de ComboBoxes
+        ComBo selectedEstado = (ComBo) cbEstado.getSelectedItem();
+        byte estado = selectedEstado != null ? (byte) (selectedEstado.getValue()) : (byte) 0;
 
-            if (res) {
-                boolean r = false;
+        ComBo selectedHorario = (ComBo) cbHorario.getSelectedItem();
+        int tipoDeHorarioId = selectedHorario != null ? (int) selectedHorario.getValue() : 0;
+
+        ComBo selectedPuesto = (ComBo) cbPuesto.getSelectedItem();
+        int puestoTrabajoId = selectedPuesto != null ? (int) selectedPuesto.getValue() : 0;
+
+        // Validaciones de campos obligatorios
+        if (txtNombre.getText().trim().isEmpty() ||
+                txtApellido.getText().trim().isEmpty() ||
+                txtDui.getText().trim().isEmpty() ||
+                txtCorreo.getText().trim().isEmpty() ||
+                txtUsuario.getText().trim().isEmpty() ||
+                estado == (byte) 0 || tipoDeHorarioId == 0 || puestoTrabajoId == 0) {
+            JOptionPane.showMessageDialog(null,
+                    "Los campos con * son obligatorios y los ComboBoxes deben tener una selección válida.",
+                    "Validación", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        // Validación y parseo de Teléfono
+        int telefono;
+        try {
+            telefono = Integer.parseInt(txtTelefono.getText().trim());
+            if (telefono <= 0) {
+                JOptionPane.showMessageDialog(null, "El teléfono debe ser un número válido y positivo.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El teléfono debe ser un número entero válido.", "Validación", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+        // Validación y parseo de Salario
+        double salario;
+        try {
+            salario = Double.parseDouble(txtSalario.getText().trim());
+            if (salario <= 0) {
+                JOptionPane.showMessageDialog(null, "El salario debe ser un número válido y positivo.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(null, "El salario debe ser un número decimal válido.", "Validación", JOptionPane.WARNING_MESSAGE);
+            return false;
+        }
+
+
+        if (this.en.getFechacontra() == null) {
+            JOptionPane.showMessageDialog(null, "La fecha de contrato no pudo ser establecida.", "Error Interno", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+
+
+        // Si todas las validaciones pasan, asignar valores al objeto Empleado
+        this.en.setTipoDeHorarioId(tipoDeHorarioId);
+        this.en.setPuestoTrabajoId(puestoTrabajoId);
+        this.en.setDui(txtDui.getText().trim());
+        this.en.setNombre(txtNombre.getText().trim());
+        this.en.setApellido(txtApellido.getText().trim());
+        this.en.setTelefono(telefono);
+        this.en.setCorreo(txtCorreo.getText().trim());
+        this.en.setEstado(estado);
+        this.en.setSalario(salario);
+        this.en.setUsuario(txtUsuario.getText().trim());
+
+        // Para CREATE, también validar y asignar la contraseña
+        if (this.cud == CUD.CREATE) {
+            String password = new String(txtPassword.getPassword());
+            if (password.trim().isEmpty()) {
+                JOptionPane.showMessageDialog(null, "La contraseña es obligatoria para nuevos empleados.", "Validación", JOptionPane.WARNING_MESSAGE);
+                return false;
+            }
+            this.en.setPasswordHash(password);
+        }
+
+        return true;
+    }
+
+    private void ok() {
+        try {
+            boolean res = getValuesControls(); // Obtener y validar los valores del formulario
+
+            if (res) { // Si la validación fue exitosa
+                boolean r = true; // Resultado de la operación de base de datos
 
                 switch (this.cud) {
                     case CREATE:
-                        System.out.println("Formulario - ok: Intentando crear empleado..."); // <-- AÑADIDO PARA DEPURACIÓN
-                        Empleado empleado = empleadoDAO.create(this.em);
-                        System.out.println("Formulario - ok: EmpleadoDAO.create() devolvió: " + (empleado != null ? "Objeto Empleado" : "null")); // <-- AÑADIDO PARA DEPURACIÓN
-                        if (empleado != null) {
-                            System.out.println("Formulario - ok: ID del empleado retornado: " + empleado.getId()); // <-- AÑADIDO PARA DEPURACIÓN
-                            if (empleado.getId() > 0) {
-                                r = true;
-                            } else {
-                                System.out.println("Formulario - ok: El ID del empleado retornado es 0 o negativo."); // <-- AÑADIDO PARA DEPURACIÓN
-                            }
-                        } else {
-                            System.out.println("Formulario - ok: EmpleadoDAO.create() retornó null."); // <-- AÑADIDO PARA DEPURACIÓN
+                        Empleado nuevoEmpleado = empleadoDAO.create(this.en);
+                        if (nuevoEmpleado.getId() > 0) {
+                            r = true;
                         }
                         break;
-                    // Los casos UPDATE y DELETE no están implementados en tu código original para el método ok()
-                    // Si los vas a implementar, asegúrate de que también establezcan 'r = true;' bajo las condiciones correctas.
+                    case UPDATE:
+                        r = empleadoDAO.update(this.en);
+                        break;
+                    case DELETE:
+                        r = empleadoDAO.delete(this.en);
+                        break;
                 }
 
-                System.out.println("Formulario - ok: Resultado final 'r': " + r); // <-- AÑADIDO PARA DEPURACIÓN
                 if (r) {
                     JOptionPane.showMessageDialog(null,
                             "Transacción realizada exitosamente",
                             "Información", JOptionPane.INFORMATION_MESSAGE);
-                    this.dispose();
-                    // Refrescar la tabla principal si tienes una (comentar si no aplica)
-                    if (mainForm != null) {
-                        // mainForm.loadEmpleados(); // Si tienes un método para recargar la tabla en MainForm
-                    }
+                    this.dispose(); // Cierra la ventana
                 } else {
                     JOptionPane.showMessageDialog(null,
                             "No se logró realizar ninguna acción",
                             "ERROR", JOptionPane.ERROR_MESSAGE);
-                    // No hay 'return' aquí, así que el flujo continúa.
-                    // Podrías poner un 'return;' aquí si quieres que la ejecución se detenga.
                 }
-            } else {
-                JOptionPane.showMessageDialog(null,
-                        "Los campos con * son obligatorios o tienen formato incorrecto", // Mensaje más específico
-                        "Validación", JOptionPane.WARNING_MESSAGE);
-                return;
             }
+            // Si res es false, el mensaje de error ya se mostró en getValuesControls()
         } catch (Exception ex) {
-            System.err.println("Formulario - ok: EXCEPCIÓN INESPERADA:"); // <-- AÑADIDO PARA DEPURACIÓN
-            ex.printStackTrace(); // <-- AÑADIDO PARA DEPURACIÓN
             JOptionPane.showMessageDialog(null,
-                    "Error inesperado: " + ex.getMessage(), // Añadir "Error inesperado"
+                    "Error en la operación: " + ex.getMessage(),
                     "ERROR", JOptionPane.ERROR_MESSAGE);
-            return;
         }
-    }
-
-    private boolean getValuesControls() {
-        System.out.println("Formulario - getValuesControls: Validando campos..."); // <-- AÑADIDO PARA DEPURACIÓN
-
-        // 1. DUI
-        String dui = txtDui.getText().trim();
-        if (dui.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo DUI es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setDui(dui);
-
-        // 2. Nombre
-        String nombre = txtNombre.getText().trim();
-        if (nombre.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Nombre es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setNombre(nombre);
-
-        // 3. Apellido
-        String apellido = txtApellido.getText().trim();
-        if (apellido.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Apellido es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setApellido(apellido);
-
-        // 4. Teléfono (asumiendo que es int)
-        String telefonoStr = txtTelefono.getText().trim();
-        if (telefonoStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Teléfono es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        try {
-            this.em.setTelefono(Integer.parseInt(telefonoStr));
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "El campo Teléfono debe ser un número válido.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-
-        // 5. Correo
-        String correo = txtCorreo.getText().trim();
-        if (correo.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Correo es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setCorreo(correo);
-
-        // 6. Salario Base (asumiendo que es double)
-        String salarioStr = txtSalario.getText().trim();
-        if (salarioStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Salario es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        try {
-            this.em.setSalario(Double.parseDouble(salarioStr));
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(this, "El campo Salario debe ser un número válido.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-
-        // 7. Fecha Contratación Inicial (LocalDateTime)
-        String fechaStr = txtFecha.getText().trim();
-        if (fechaStr.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Fecha Contratación es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        try {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            this.em.setFechacontra(LocalDate.parse(fechaStr, formatter).atStartOfDay());
-        } catch (DateTimeParseException e) {
-            JOptionPane.showMessageDialog(this, "El formato de la Fecha de Contratación debe ser DD/MM/AAAA.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-
-        // 8. Usuario
-        String usuario = txtUsuario.getText().trim();
-        if (usuario.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "El campo Usuario es obligatorio.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setUsuario(usuario);
-
-        // 9. Estado (ComboBox)
-        ComBo selectedEstado = (ComBo) cbEstado.getSelectedItem();
-        if (selectedEstado == null || (selectedEstado.getValue() instanceof Byte && (byte) selectedEstado.getValue() == 0)) {
-            JOptionPane.showMessageDialog(this, "Debe seleccionar un Estado.", "Validación", JOptionPane.WARNING_MESSAGE);
-            return false;
-        }
-        this.em.setEstado((byte) selectedEstado.getValue());
-
-        // 10. Puesto de Trabajo (ComboBox)
-        ComBo selectedPuesto = (ComBo) cbPuesto.getSelectedItem();
-        // Asegúrate de que el valor sea un Integer antes de castear
-        if (selectedPuesto != null && selectedPuesto.getValue() instanceof Integer) {
-            int puestoId = (Integer) selectedPuesto.getValue();
-            if (puestoId == 0) { // Si es "Ninguno" o 0
-                this.em.setPuestoTrabajoId(null);
-            } else {
-                this.em.setPuestoTrabajoId(puestoId);
-            }
-        } else {
-            this.em.setPuestoTrabajoId(null);
-        }
-
-        // 11. Horario (ComboBox)
-        ComBo selectedHorario = (ComBo) cbHorario.getSelectedItem();
-        // Asegúrate de que el valor sea un Integer antes de castear
-        if (selectedHorario != null && selectedHorario.getValue() instanceof Integer) {
-            int horarioId = (Integer) selectedHorario.getValue();
-            if (horarioId == 0) { // Si es "Ninguno" o 0
-                this.em.setTipoDeHorarioId(null);
-            } else {
-                this.em.setTipoDeHorarioId(horarioId);
-            }
-        } else {
-            this.em.setTipoDeHorarioId(null);
-        }
-
-        // 12. Contraseña (solo para CREATE)
-        if (this.cud == CUD.CREATE) {
-            String password = new String(txtPassword.getPassword()).trim();
-            if (password.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "El campo Contraseña es obligatorio para crear un usuario.", "Validación", JOptionPane.WARNING_MESSAGE);
-                return false;
-            }
-            this.em.setPasswordHash(password);
-        }
-
-        System.out.println("Formulario - getValuesControls: Todos los campos validados correctamente."); // <-- AÑADIDO PARA DEPURACIÓN
-        return true; // Si todas las validaciones pasan, retorna true
     }
 }
+

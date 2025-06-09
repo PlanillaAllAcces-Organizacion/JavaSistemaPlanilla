@@ -36,9 +36,9 @@ CREATE TABLE Empleado (
     Correo VARCHAR(100) NULL,
     Estado TINYINT NULL,
     SalarioBase DECIMAL(10,2) NULL,
-    FechaContraInicial DATE NOT NULL,
+    FechaContraInicial DATETIME NOT NULL,
     Usuario VARCHAR(60) NULL,
-    Password CHAR(32) NULL,
+    Password VARCHAR(70) NULL,
     CONSTRAINT FK_Empleado_Horario FOREIGN KEY (TipoDeHorarioId) REFERENCES TipoDeHorario(Id),
     CONSTRAINT FK_Empleado_Puesto FOREIGN KEY (PuestoTrabajoId) REFERENCES PuestoTrabajo(Id)
 );

@@ -1,13 +1,12 @@
 package Grupo05.dominio;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 public class Empleado {
 
     int Id;
-    Integer tipoDeHorarioId;
-    Integer puestoTrabajoId;
+    int tipoDeHorarioId;
+    int puestoTrabajoId;
     String dui;
     String nombre;
     String apellido;
@@ -24,7 +23,7 @@ public class Empleado {
 
     }
 
-    public Empleado(int Id, Integer tipoDeHorarioId, Integer puestoTrabajoId, String dui, String nombre, String apellido, int telefono, String corre,
+    public Empleado(int Id, int tipoDeHorarioId, int puestoTrabajoId, String dui, String nombre, String apellido, int telefono, String corre,
                     byte estado, double salario, LocalDateTime fechacontra, String usuario, String passwordHash){
         this.Id = Id;
         this.tipoDeHorarioId = tipoDeHorarioId;
@@ -55,7 +54,7 @@ public class Empleado {
         return tipoDeHorarioId;
     }
 
-    public void setTipoDeHorarioId(Integer tipoDeHorarioId) {
+    public void setTipoDeHorarioId(int tipoDeHorarioId) {
         this.tipoDeHorarioId = tipoDeHorarioId;
     }
 
@@ -63,7 +62,7 @@ public class Empleado {
         return puestoTrabajoId;
     }
 
-    public void setPuestoTrabajoId(Integer puestoTrabajoId) {
+    public void setPuestoTrabajoId(int puestoTrabajoId) {
         this.puestoTrabajoId = puestoTrabajoId;
     }
 
