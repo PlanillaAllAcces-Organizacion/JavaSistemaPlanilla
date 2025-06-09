@@ -2,6 +2,7 @@ package Grupo05.Formularios;
 
 import Grupo05.Persistencia.AsignacionBonosDAO;
 import Grupo05.Persistencia.BonoDAO;
+import Grupo05.Persistencia.EmpleadoDAO;
 import Grupo05.dominio.AsignacionBonos;
 import Grupo05.dominio.Bonos;
 import Grupo05.dominio.Empleado;
@@ -20,13 +21,13 @@ public class AsignacionBonosForm extends JFrame {
     private JButton btnDesasignar;
     private JButton btnRefresh;
     private JButton btnVerBonosAsignados;
-    //private EmpleadoDAO empleadoDAO;
+    private EmpleadoDAO empleadoDAO;
     private BonoDAO bonoDAO;
     private AsignacionBonosDAO asignacionBonoDAO;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
 
-    /*
+
     public AsignacionBonosForm() {
         empleadoDAO = new EmpleadoDAO();
         bonoDAO = new BonoDAO();
@@ -56,7 +57,6 @@ public class AsignacionBonosForm extends JFrame {
         JScrollPane empleadosScrollPane = new JScrollPane(empleadosTable);
         empleadosPanel.add(empleadosScrollPane, BorderLayout.CENTER);
 
-        // Panel de botones para empleados
         JPanel empleadosButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnVerBonosAsignados = new JButton("Ver Bonos Asignados");
         btnVerBonosAsignados.addActionListener(e -> mostrarBonosAsignados());
@@ -97,16 +97,16 @@ public class AsignacionBonosForm extends JFrame {
         mainPanel.add(tabbedPane, BorderLayout.CENTER);
         add(mainPanel);
     }
-
-    private void loadEmpleados() {
-        try {
-            List<Empleado> empleados = empleadoDAO.getById();
-            System.out.println("Número de empleados obtenidos: " + empleados.size()); // Debug
-            updateEmpleadosTableModel(empleados);
-        } catch (SQLException ex) {
-            showError("Error al cargar empleados: " + ex.getMessage());
-        }
-    }
+//
+//    private void loadEmpleados() {
+//        try {
+//            List<Empleado> empleados = empleadoDAO.getAll();
+//            updateEmpleadosTableModel(empleados);
+//        } catch (SQLException ex) {
+//            showError("Error al cargar empleados: " + ex.getMessage());
+//            ex.printStackTrace();
+//        }
+//    }
 
     private void loadBonosDisponibles() {
         try {
@@ -131,20 +131,40 @@ public class AsignacionBonosForm extends JFrame {
         for (Empleado empleado : empleados) {
             try {
                 int bonosAsignados = asignacionBonoDAO.getByEmpleadoId(empleado.getId()).size();
-
                 model.addRow(new Object[]{
                         empleado.getId(),
                         empleado.getNombre(),
                         empleado.getApellido(),
-                        empleado.getPuesto(),
+                        empleado.getPuestoTrabajoId(),
                         bonosAsignados
                 });
             } catch (SQLException ex) {
                 showError("Error al obtener bonos asignados: " + ex.getMessage());
             }
         }
-
         empleadosTable.setModel(model);
+    }
+
+    private void updateBonosTableModel(List<Bonos> bonos) {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[]{"ID", "Nombre", "Valor", "Tipo"},
+                0
+        ) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        for (Bonos bono : bonos) {
+            model.addRow(new Object[]{
+                    bono.getId(),
+                    bono.getNombreBono(),
+                    bono.getValor(),
+                    bono.getOperacion() == 1 ? "Fijo" : "Variable"
+            });
+        }
+        bonosTable.setModel(model);
     }
 
     private void mostrarBonosAsignados() {
@@ -313,5 +333,5 @@ public class AsignacionBonosForm extends JFrame {
         SwingUtilities.invokeLater(() -> new AsignacionBonosForm().setVisible(true));
     }
 
-     */
+
 }
