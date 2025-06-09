@@ -14,6 +14,9 @@ public class EmpleadoReadingForm extends JDialog {
     private JButton btnEliminar;
     private JTable tableEmpleados;
     private JPanel mainPanel;
+    private JButton button1;
+    private JButton btnsBono;
+    private JButton btnsDescuento;
 
     private EmpleadoDAO empleadoDAO; // Instancia de UserDAO para realizar operaciones de base de datos de usuarios.
     private MainForm mainForm; //
