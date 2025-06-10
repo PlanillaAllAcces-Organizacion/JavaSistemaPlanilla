@@ -5,7 +5,7 @@ import java.time.LocalTime;
 
 public class Empleado {
 
-    int Id;
+    int id;
     Integer tipoDeHorarioId;
     Integer puestoTrabajoId;
     String dui;
@@ -16,17 +16,15 @@ public class Empleado {
     byte estado;
     double salario;
     LocalDateTime fechacontra;
-    String usuario;
-    String passwordHash;
 
 
     public Empleado(){
 
     }
 
-    public Empleado(int Id, Integer tipoDeHorarioId, Integer puestoTrabajoId, String dui, String nombre, String apellido, int telefono, String corre,
+    public Empleado(int id, Integer tipoDeHorarioId, Integer puestoTrabajoId, String dui, String nombre, String apellido, int telefono, String corre,
                     byte estado, double salario, LocalDateTime fechacontra, String usuario, String passwordHash){
-        this.Id = Id;
+        this.id = id;
         this.tipoDeHorarioId = tipoDeHorarioId;
         this.puestoTrabajoId = puestoTrabajoId;
         this.dui = dui;
@@ -37,18 +35,15 @@ public class Empleado {
         this.estado = estado;
         this.salario = salario;
         this.fechacontra = fechacontra;
-        this.usuario = usuario;
-        this.passwordHash = passwordHash;
-
 
     }
 
     public int getId() {
-        return Id;
+        return id;
     }
 
     public void setId(int id) {
-        this.Id = Id;
+        this.id = id;
     }
 
     public Integer getTipoDeHorarioId() {
@@ -129,22 +124,6 @@ public class Empleado {
 
     public void setFechacontra(LocalDateTime fechacontra) {
         this.fechacontra = fechacontra;
-    }
-
-    public String getUsuario() {
-        return usuario;
-    }
-
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
-
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
     }
 
     public String getStrEstatus(){
