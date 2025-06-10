@@ -5,31 +5,25 @@ import Grupo05.dominio.Empleado;
 import java.sql.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class EmpleadoDAO {
-    private ConnectionManager cnn;
+    private ConnectionManager conn;
     private PreparedStatement ps;
     private ResultSet rs;
 
     public EmpleadoDAO(){
-        cnn = ConnectionManager.getInstance();
+        conn = ConnectionManager.getInstance();
     }
 
     public Empleado create(Empleado empleado) throws SQLException {
-        Empleado empleres = null;
-        Connection conn = null; // Declarado aquí para asegurar que se cierre en finally si la asignación falla
-        PreparedStatement ps = null; // Declarado aquí para asegurar que se cierre en finally si la asignación falla
-
-        try {
-            conn = cnn.connect(); // Solo se conecta una vez
-            ps = conn.prepareStatement(
-                    "INSERT INTO Empleado (TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial, Usuario, Password) " +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    Statement.RETURN_GENERATED_KEYS
+        Empleado res = null;
+        try{
+            ps = conn.connect().prepareStatement("INSERT INTO " +
+                            "Empleado (TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial)" +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    java.sql.Statement.RETURN_GENERATED_KEYS
             );
-
-            LocalDateTime fechaLocalDateTime = empleado.getFechacontra();
-            Timestamp timestampSql = fechaLocalDateTime != null ? Timestamp.valueOf(fechaLocalDateTime) : null;
 
             ps.setInt(1, empleado.getTipoDeHorarioId());
             ps.setInt(2, empleado.getPuestoTrabajoId());
@@ -40,109 +34,217 @@ public class EmpleadoDAO {
             ps.setString(7, empleado.getCorreo());
             ps.setByte(8, empleado.getEstado());
             ps.setDouble(9, empleado.getSalario());
-            ps.setTimestamp(10, timestampSql);
-            ps.setString(11, empleado.getUsuario());
-            ps.setString(12, empleado.getPasswordHash());
+            ps.setObject(10, empleado.getFechacontra());
 
             int affectedRows = ps.executeUpdate();
-            System.out.println("DAO - create: Filas afectadas por la inserción: " + affectedRows); // <-- AÑADIDO PARA DEPURACIÓN
 
-            if (affectedRows > 0) { // Modificado para ser más estricto con éxito
-                ResultSet generatedKeys = ps.getGeneratedKeys();
+            if (affectedRows != 0) {
+                // El ResultSet 'generatedKeys' también debe ser cerrado, pero getById ya maneja su propia conexión.
+                // Si el ID generado no se usara con getById, deberíamos cerrar 'generatedKeys' aquí.
+                ResultSet  generatedKeys = ps.getGeneratedKeys();
                 if (generatedKeys.next()) {
-                    int idGenerado = generatedKeys.getInt(1);
-                    System.out.println("DAO - create: ID generado por la BD: " + idGenerado); // <-- AÑADIDO PARA DEPURACIÓN
-                    empleres = getById(idGenerado); // Ahora sí funcionará bien
-                    System.out.println("DAO - create: Empleado recuperado por getById con ID: " + (empleres != null ? empleres.getId() : "null")); // <-- AÑADIDO PARA DEPURACIÓN
+                    int idGenerado= generatedKeys.getInt(1);
+                    res = getById(idGenerado);
                 } else {
-                    System.out.println("DAO - create: No se obtuvieron claves generadas."); // <-- AÑADIDO PARA DEPURACIÓN
-                    throw new SQLException("Creación fallida, no se obtuvo ID.");
+                    throw new SQLException("Creating empleado failed, no ID obtained.");
                 }
-                generatedKeys.close();
-            } else {
-                System.out.println("DAO - create: La inserción no afectó ninguna fila."); // <-- AÑADIDO PARA DEPURACIÓN
-                empleres = null; // Si no se afectaron filas, consideramos que la operación no fue exitosa
+                generatedKeys.close(); // Cerrar el ResultSet de las claves generadas
             }
-
-        } catch (SQLException ex) {
-            System.err.println("DAO - create: ERROR: " + ex.getMessage()); // <-- AÑADIDO PARA DEPURACIÓN
-            ex.printStackTrace(); // <-- AÑADIDO PARA DEPURACIÓN
-            throw new SQLException("Error al crear el usuario: " + ex.getMessage(), ex);
+            // ps.close(); // ¡ELIMINADO DE AQUÍ! Se moverá al finally.
+        }catch (SQLException ex){
+            throw new SQLException("Error al crear el empleado: " + ex.getMessage(), ex);
         } finally {
-            // Se asume que este 'ps' es local a este método y no el de la clase
-            if (ps != null) try { ps.close(); } catch (SQLException ignore) {
-                System.err.println("DAO - create: Error al cerrar PreparedStatement: " + ignore.getMessage()); // <-- AÑADIDO PARA DEPURACIÓN
+            // *** Cierre seguro de recursos ***
+            try {
+                if (ps != null) { // Solo cierra si ps no es null
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar PreparedStatement en create: " + e.getMessage());
             }
-            if (cnn != null) cnn.disconnect(); // Asumiendo que ConnectionManager.disconnect puede tomar la conexión o la maneja internamente
-            // Nota: Si ConnectionManager es un Singleton y maneja la única conexión,
-            // asegúrate de que 'disconnect()' no cierre la conexión si aún se necesita en otros lugares.
-            // Para pruebas, asumiremos que cerrar la conexión aquí es seguro.
+            conn.disconnect(); // Desconecta la conexión al final
         }
-
-        return empleres;
+        return res;
     }
 
 
-    public Empleado getById(int id) throws SQLException {
-        Empleado empleres = null;
-        Connection conn = null; // Declarado aquí para asegurar que se cierre en finally
-        PreparedStatement ps = null; // Declarado aquí para asegurar que se cierre en finally
-        ResultSet rs = null; // Declarado aquí para asegurar que se cierre en finally
-
-        try {
-            conn = cnn.connect(); // Obtener la conexión aquí también
-            System.out.println("DAO - getById: Conectado para buscar ID: " + id); // <-- AÑADIDO PARA DEPURACIÓN
-            // Consulta corregida con espacio entre SELECT y FROM
-            ps = conn.prepareStatement( // Usar 'conn' local
-                    "SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial, Usuario, Password " +
-                            "FROM Empleado " +
+    public boolean update(Empleado empleado) throws SQLException{
+        boolean res = false;
+        try{
+            ps = conn.connect().prepareStatement(
+                    "UPDATE Empleado " +
+                            "SET TipoDeHorarioId = ?, PuestoTrabajoId = ?, DUI = ?, Nombre = ?, Apellido = ?, Telefono = ?, Correo = ?, Estado = ?, SalarioBase = ?, FechaContraInicial = ? " +
                             "WHERE Id = ?"
             );
 
+            ps.setInt(1, empleado.getTipoDeHorarioId());
+            ps.setInt(2, empleado.getPuestoTrabajoId());
+            ps.setString(3, empleado.getDui());
+            ps.setString(4, empleado.getNombre());
+            ps.setString(5, empleado.getApellido());
+            ps.setInt(6, empleado.getTelefono());
+            ps.setString(7, empleado.getCorreo());
+            ps.setByte(8, empleado.getEstado());
+            ps.setDouble(9, empleado.getSalario());
+            ps.setObject(10, empleado.getFechacontra());
+            ps.setInt(11, empleado.getId());
+
+            if(ps.executeUpdate() > 0){
+                res = true;
+            }
+            // ps.close(); // ¡ELIMINADO DE AQUÍ!
+        }catch (SQLException ex){
+            throw new SQLException("Error al modificar el empleado: " + ex.getMessage(), ex);
+        } finally {
+            // *** Cierre seguro de recursos ***
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar PreparedStatement en update: " + e.getMessage());
+            }
+            conn.disconnect();
+        }
+        return res;
+    }
+
+
+    public boolean delete(Empleado empleado) throws SQLException{
+        boolean res = false;
+        try{
+            ps = conn.connect().prepareStatement(
+                    "DELETE FROM Empleado WHERE Id = ?"
+            );
+            ps.setInt(1, empleado.getId());
+
+            if(ps.executeUpdate() > 0){
+                res = true;
+            }
+            // ps.close(); // ¡ELIMINADO DE AQUÍ!
+        }catch (SQLException ex){
+            throw new SQLException("Error al eliminar el empleado: " + ex.getMessage(), ex);
+        } finally {
+            // *** Cierre seguro de recursos ***
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar PreparedStatement en delete: " + e.getMessage());
+            }
+            conn.disconnect();
+        }
+        return res;
+    }
+
+    /**
+     * Busca empleados en la base de datos cuyo nombre o DUI contenga la cadena de búsqueda proporcionada.
+     * ...
+     */
+    public ArrayList<Empleado> search(String query) throws SQLException{
+        ArrayList<Empleado> records  = new ArrayList<>();
+
+        try {
+            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
+                    "FROM Empleado " +
+                    "WHERE Nombre LIKE ? OR DUI LIKE ?");
+
+            ps.setString(1, "%" + query + "%");
+            ps.setString(2, "%" + query + "%");
+
+            rs = ps.executeQuery(); // rs se inicializa aquí
+
+            while (rs.next()){
+                Empleado empleado = new Empleado();
+                empleado.setId(rs.getInt(1));
+                empleado.setTipoDeHorarioId(rs.getInt(2));
+                empleado.setPuestoTrabajoId(rs.getInt(3));
+                empleado.setDui(rs.getString(4));
+                empleado.setNombre(rs.getString(5));
+                empleado.setApellido(rs.getString(6));
+                empleado.setTelefono(rs.getInt(7));
+                empleado.setCorreo(rs.getString(8));
+                empleado.setEstado(rs.getByte(9));
+                empleado.setSalario(rs.getDouble(10));
+                empleado.setFechacontra(rs.getObject(11, LocalDateTime.class));
+                records.add(empleado);
+            }
+            // ps.close(); // ¡ELIMINADO DE AQUÍ!
+            // rs.close(); // ¡ELIMINADO DE AQUÍ!
+        } catch (SQLException ex){
+            throw new SQLException("Error al buscar empleados: " + ex.getMessage(), ex);
+        } finally {
+            // *** Cierre seguro de recursos ***
+            try {
+                if (rs != null) { // Solo cierra si rs no es null
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar ResultSet en search: " + e.getMessage());
+            }
+            try {
+                if (ps != null) { // Solo cierra si ps no es null
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar PreparedStatement en search: " + e.getMessage());
+            }
+            conn.disconnect();
+        }
+        return records;
+    }
+
+
+    public Empleado getById(int id) throws SQLException{
+        Empleado empleado  = null;
+
+        try {
+            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
+                    "FROM Empleado " +
+                    "WHERE Id = ?");
+
             ps.setInt(1, id);
+
             rs = ps.executeQuery();
 
             if (rs.next()) {
-                empleres = new Empleado();
-
-                empleres.setId(rs.getInt("Id"));
-                System.out.println("DAO - getById: Encontrado empleado con ID: " + empleres.getId()); // <-- AÑADIDO PARA DEPURACIÓN
-                empleres.setTipoDeHorarioId(rs.getInt("TipoDeHorarioId"));
-                empleres.setPuestoTrabajoId(rs.getInt("PuestoTrabajoId"));
-                empleres.setDui(rs.getString("DUI"));
-                empleres.setNombre(rs.getString("Nombre"));
-                empleres.setApellido(rs.getString("Apellido"));
-                empleres.setTelefono(rs.getInt("Telefono"));
-                empleres.setCorreo(rs.getString("Correo"));
-                empleres.setEstado(rs.getByte("Estado"));
-                empleres.setSalario(rs.getDouble("SalarioBase"));
-
-                Timestamp fechaTimestamp = rs.getTimestamp("FechaContraInicial");
-                if (fechaTimestamp != null) {
-                    empleres.setFechacontra(fechaTimestamp.toLocalDateTime());
-                }
-
-                empleres.setUsuario(rs.getString("Usuario"));
-                empleres.setPasswordHash(rs.getString("Password"));
-            } else {
-                System.out.println("DAO - getById: No se encontró empleado con ID: " + id); // <-- AÑADIDO PARA DEPURACIÓN
+                empleado = new Empleado();
+                empleado.setId(rs.getInt(1));
+                empleado.setTipoDeHorarioId(rs.getInt(2));
+                empleado.setPuestoTrabajoId(rs.getInt(3));
+                empleado.setDui(rs.getString(4));
+                empleado.setNombre(rs.getString(5));
+                empleado.setApellido(rs.getString(6));
+                empleado.setTelefono(rs.getInt(7));
+                empleado.setCorreo(rs.getString(8));
+                empleado.setEstado(rs.getByte(9));
+                empleado.setSalario(rs.getDouble(10));
+                empleado.setFechacontra(rs.getObject(11, LocalDateTime.class));
             }
-
-        } catch (SQLException ex) {
-            System.err.println("DAO - getById: ERROR: " + ex.getMessage()); // <-- AÑADIDO PARA DEPURACIÓN
-            ex.printStackTrace(); // <-- AÑADIDO PARA DEPURACIÓN
-            throw new SQLException("Error al obtener un usuario por id: " + ex.getMessage(), ex);
+            // ps.close(); // ¡ELIMINADO DE AQUÍ!
+            // rs.close(); // ¡ELIMINADO DE AQUÍ!
+        } catch (SQLException ex){
+            throw new SQLException("Error al obtener un empleado por id: " + ex.getMessage(), ex);
         } finally {
-            if (rs != null) try { rs.close(); } catch (SQLException ignore) {
-                System.err.println("DAO - getById: Error al cerrar ResultSet: " + ignore.getMessage()); // <-- AÑADIDO PARA DEPURACIÓN
+            // *** Cierre seguro de recursos ***
+            try {
+                if (rs != null) {
+                    rs.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar ResultSet en getById: " + e.getMessage());
             }
-            if (ps != null) try { ps.close(); } catch (SQLException ignore) {
-                System.err.println("DAO - getById: Error al cerrar PreparedStatement: " + ignore.getMessage()); // <-- AÑADIDO PARA DEPURACIÓN
+            try {
+                if (ps != null) {
+                    ps.close();
+                }
+            } catch (SQLException e) {
+                System.err.println("Error al cerrar PreparedStatement en getById: " + e.getMessage());
             }
-            if (cnn != null) cnn.disconnect(); // Asumiendo que ConnectionManager.disconnect puede tomar la conexión
+            conn.disconnect();
         }
-
-        return empleres;
+        return empleado;
     }
 
 }
