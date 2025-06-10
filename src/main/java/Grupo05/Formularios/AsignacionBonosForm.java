@@ -38,7 +38,7 @@ public class AsignacionBonosForm extends JFrame {
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        loadEmpleados();
+        //loadEmpleados();
         loadBonosDisponibles();
     }
 
@@ -62,7 +62,7 @@ public class AsignacionBonosForm extends JFrame {
         btnVerBonosAsignados.addActionListener(e -> mostrarBonosAsignados());
         btnRefresh = new JButton("Actualizar");
         btnRefresh.addActionListener(e -> {
-            loadEmpleados();
+            //loadEmpleados();
             loadBonosDisponibles();
         });
 
@@ -238,7 +238,7 @@ public class AsignacionBonosForm extends JFrame {
                                 "Bono asignado exitosamente",
                                 "Éxito",
                                 JOptionPane.INFORMATION_MESSAGE);
-                        loadEmpleados();
+                        //loadEmpleados();
                     }
                 } else {
                     JOptionPane.showMessageDialog(this,
@@ -301,7 +301,7 @@ public class AsignacionBonosForm extends JFrame {
                                         "Bono desasignado exitosamente",
                                         "Éxito",
                                         JOptionPane.INFORMATION_MESSAGE);
-                                loadEmpleados();
+                                //loadEmpleados();
                             }
                         }
                     }

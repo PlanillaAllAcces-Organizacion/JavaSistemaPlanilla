@@ -42,12 +42,12 @@
           <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
-      <component id="53d04" class="javax.swing.JButton" binding="button1" default-binding="true">
+      <component id="53d04" class="javax.swing.JButton" binding="btnCrear">
         <constraints>
           <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Button"/>
+          <text value="Crear"/>
         </properties>
       </component>
       <component id="8c556" class="javax.swing.JButton" binding="btnEliminar">
