@@ -9,7 +9,6 @@ import Grupo05.dominio.Empleado;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +25,11 @@ public class AsignacionBonosForm extends JFrame {
     private AsignacionBonosDAO asignacionBonoDAO;
     private JPanel mainPanel;
     private JTabbedPane tabbedPane;
+    private JComboBox comboBox1;
+    private JTable table1;
+    private JTable table2;
+    private JButton asignarBonoButton;
+    private JButton eliminarAsignaciónButton;
 
 
     public AsignacionBonosForm() {
