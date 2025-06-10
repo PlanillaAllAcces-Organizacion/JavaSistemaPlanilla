@@ -6,6 +6,15 @@ GO
 USE Paysheet1;
 GO
 
+-- Tabla: Usuarios
+CREATE TABLE Usuarios (
+    id INT PRIMARY KEY IDENTITY(1,1),
+    name VARCHAR(100) NOT NULL,
+    password VARCHAR(64) NOT NULL,
+    fechaCreacion DATETIME NOT NULL,
+    status TINYINT NOT NULL
+);
+
 -- Tabla: PuestoTrabajo
 CREATE TABLE PuestoTrabajo (
     Id INT IDENTITY(1,1) PRIMARY KEY,
