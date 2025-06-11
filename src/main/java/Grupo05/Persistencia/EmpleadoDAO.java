@@ -1,33 +1,28 @@
 package Grupo05.Persistencia;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.LocalDateTime; // Import para LocalDateTime
-import java.util.ArrayList;
 
-import Grupo05.dominio.Empleado; // Importa la clase Empleado
-import Grupo05.Utils.PasswordHasher; // Asumiendo que PasswordHasher está aquí
+import Grupo05.dominio.Empleado;
+
+import java.sql.*;
+
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 public class EmpleadoDAO {
     private ConnectionManager conn;
-    private PreparedStatement ps; // Declarado aquí
-    private ResultSet rs;         // Declarado aquí
+    private PreparedStatement ps;
+    private ResultSet rs;
 
     public EmpleadoDAO(){
         conn = ConnectionManager.getInstance();
     }
 
-    /**
-     * Crea un nuevo empleado en la base de datos.
-     * ...
-     */
     public Empleado create(Empleado empleado) throws SQLException {
         Empleado res = null;
         try{
-            ps = conn.connect().prepareStatement( // ps se inicializa aquí
-                    "INSERT INTO " +
-                            "Empleado (TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial, Usuario, Password)" +
-                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ps = conn.connect().prepareStatement("INSERT INTO " +
+                            "Empleado (TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial)" +
+                            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                     java.sql.Statement.RETURN_GENERATED_KEYS
             );
 
@@ -41,8 +36,6 @@ public class EmpleadoDAO {
             ps.setByte(8, empleado.getEstado());
             ps.setDouble(9, empleado.getSalario());
             ps.setObject(10, empleado.getFechacontra());
-            ps.setString(11, empleado.getUsuario());
-            ps.setString(12, PasswordHasher.hashPassword(empleado.getPasswordHash()));
 
             int affectedRows = ps.executeUpdate();
 
@@ -75,16 +68,13 @@ public class EmpleadoDAO {
         return res;
     }
 
-    /**
-     * Actualiza la información de un empleado existente en la base de datos.
-     * ...
-     */
+
     public boolean update(Empleado empleado) throws SQLException{
         boolean res = false;
         try{
             ps = conn.connect().prepareStatement(
                     "UPDATE Empleado " +
-                            "SET TipoDeHorarioId = ?, PuestoTrabajoId = ?, DUI = ?, Nombre = ?, Apellido = ?, Telefono = ?, Correo = ?, Estado = ?, Salario = ?, FechaContraInicial = ?, Usuario = ? " +
+                            "SET TipoDeHorarioId = ?, PuestoTrabajoId = ?, DUI = ?, Nombre = ?, Apellido = ?, Telefono = ?, Correo = ?, Estado = ?, SalarioBase = ?, FechaContraInicial = ? " +
                             "WHERE Id = ?"
             );
 
@@ -98,8 +88,7 @@ public class EmpleadoDAO {
             ps.setByte(8, empleado.getEstado());
             ps.setDouble(9, empleado.getSalario());
             ps.setObject(10, empleado.getFechacontra());
-            ps.setString(11, empleado.getUsuario());
-            ps.setInt(12, empleado.getId());
+            ps.setInt(11, empleado.getId());
 
             if(ps.executeUpdate() > 0){
                 res = true;
@@ -121,10 +110,7 @@ public class EmpleadoDAO {
         return res;
     }
 
-    /**
-     * Elimina un empleado de la base de datos basándose en su ID.
-     * ...
-     */
+
     public boolean delete(Empleado empleado) throws SQLException{
         boolean res = false;
         try{
@@ -161,7 +147,7 @@ public class EmpleadoDAO {
         ArrayList<Empleado> records  = new ArrayList<>();
 
         try {
-            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial, Usuario, Password " +
+            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
                     "FROM Empleado " +
                     "WHERE Nombre LIKE ? OR DUI LIKE ?");
 
@@ -183,8 +169,6 @@ public class EmpleadoDAO {
                 empleado.setEstado(rs.getByte(9));
                 empleado.setSalario(rs.getDouble(10));
                 empleado.setFechacontra(rs.getObject(11, LocalDateTime.class));
-                empleado.setUsuario(rs.getString(12));
-                empleado.setPasswordHash(rs.getString(13));
                 records.add(empleado);
             }
             // ps.close(); // ¡ELIMINADO DE AQUÍ!
@@ -212,15 +196,12 @@ public class EmpleadoDAO {
         return records;
     }
 
-    /**
-     * Obtiene un empleado de la base de datos basado en su ID.
-     * ...
-     */
+
     public Empleado getById(int id) throws SQLException{
         Empleado empleado  = null;
 
         try {
-            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial, Usuario, Password " +
+            ps = conn.connect().prepareStatement("SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
                     "FROM Empleado " +
                     "WHERE Id = ?");
 
@@ -241,13 +222,9 @@ public class EmpleadoDAO {
                 empleado.setEstado(rs.getByte(9));
                 empleado.setSalario(rs.getDouble(10));
                 empleado.setFechacontra(rs.getObject(11, LocalDateTime.class));
-                empleado.setUsuario(rs.getString(12));
-                empleado.setPasswordHash(rs.getString(13));
             }
-
-            System.out.println("Buscando empleado con ID: " + id);
-
-
+            // ps.close(); // ¡ELIMINADO DE AQUÍ!
+            // rs.close(); // ¡ELIMINADO DE AQUÍ!
         } catch (SQLException ex){
             throw new SQLException("Error al obtener un empleado por id: " + ex.getMessage(), ex);
         } finally {
@@ -270,98 +247,40 @@ public class EmpleadoDAO {
         }
         return empleado;
     }
-
-    /**
-     * Autentica a un empleado en la base de datos verificando su usuario,
-     * contraseña (comparando el hash) y estado (activo).
-     * ...
-     */
-    public Empleado authenticate(Empleado empleado) throws SQLException{
-
-        Empleado empleadoAuthenticate = null;
+    public List<Empleado> getAllActive() throws SQLException {
+        List<Empleado> empleados = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
         try {
-            ps = conn.connect().prepareStatement("SELECT Id, tipoDeHorarioId, puestoTrabajoId, dui, nombre, apellido, telefono, correo, estado, salario, fechacontra, usuario, passwordHash " +
-                    "FROM Empleados " +
-                    "WHERE usuario = ? AND passwordHash = ? AND estado = 1");
-
-            ps.setString(1, empleado.getUsuario());
-            ps.setString(2, PasswordHasher.hashPassword(empleado.getPasswordHash()));
+            connection = conn.connect();
+            ps = connection.prepareStatement(
+                    "SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
+                            "FROM Empleado WHERE Estado = 1"
+            );
             rs = ps.executeQuery();
 
-            if (rs.next()) {
-                empleadoAuthenticate = new Empleado();
-                empleadoAuthenticate.setId(rs.getInt(1));
-                empleadoAuthenticate.setTipoDeHorarioId(rs.getInt(2));
-                empleadoAuthenticate.setPuestoTrabajoId(rs.getInt(3));
-                empleadoAuthenticate.setDui(rs.getString(4));
-                empleadoAuthenticate.setNombre(rs.getString(5));
-                empleadoAuthenticate.setApellido(rs.getString(6));
-                empleadoAuthenticate.setTelefono(rs.getInt(7));
-                empleadoAuthenticate.setCorreo(rs.getString(8));
-                empleadoAuthenticate.setEstado(rs.getByte(9));
-                empleadoAuthenticate.setSalario(rs.getDouble(10));
-                empleadoAuthenticate.setFechacontra(rs.getObject(11, LocalDateTime.class));
-                empleadoAuthenticate.setUsuario(rs.getString(12));
-                empleadoAuthenticate.setPasswordHash(rs.getString(13));
+            while (rs.next()) {
+                Empleado empleado = new Empleado();
+                empleado.setId(rs.getInt("Id"));
+                empleado.setTipoDeHorarioId(rs.getInt("TipoDeHorarioId"));
+                empleado.setPuestoTrabajoId(rs.getInt("PuestoTrabajoId"));
+                empleado.setDui(rs.getString("DUI"));
+                empleado.setNombre(rs.getString("Nombre"));
+                empleado.setApellido(rs.getString("Apellido"));
+                empleado.setTelefono(rs.getInt("Telefono"));
+                empleado.setCorreo(rs.getString("Correo"));
+                empleado.setEstado(rs.getByte("Estado"));
+                empleado.setSalario(rs.getDouble("SalarioBase"));
+                empleado.setFechacontra(rs.getObject("FechaContraInicial", LocalDateTime.class));
+                empleados.add(empleado);
             }
-            // ps.close(); // ¡ELIMINADO DE AQUÍ!
-            // rs.close(); // ¡ELIMINADO DE AQUÍ!
-        } catch (SQLException ex){
-            throw new SQLException("Error al autenticar un empleado: " + ex.getMessage(), ex);
         } finally {
-            // *** Cierre seguro de recursos ***
-            try {
-                if (rs != null) {
-                    rs.close();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error al cerrar ResultSet en authenticate: " + e.getMessage());
-            }
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error al cerrar PreparedStatement en authenticate: " + e.getMessage());
-            }
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
             conn.disconnect();
         }
-        return empleadoAuthenticate;
-    }
-
-    /**
-     * Actualiza la contraseña de un empleado existente en la base de datos.
-     * ...
-     */
-    public boolean updatePassword(Empleado empleado) throws SQLException{
-        boolean res = false;
-        try{
-            ps = conn.connect().prepareStatement(
-                    "UPDATE Empleados " +
-                            "SET passwordHash = ? " +
-                            "WHERE Id = ?"
-            );
-            ps.setString(1, PasswordHasher.hashPassword(empleado.getPasswordHash()));
-            ps.setInt(2, empleado.getId());
-
-            if(ps.executeUpdate() > 0){
-                res = true;
-            }
-            // ps.close(); // ¡ELIMINADO DE AQUÍ!
-        }catch (SQLException ex){
-            throw new SQLException("Error al modificar el password del empleado: " + ex.getMessage(), ex);
-        } finally {
-            // *** Cierre seguro de recursos ***
-            try {
-                if (ps != null) {
-                    ps.close();
-                }
-            } catch (SQLException e) {
-                System.err.println("Error al cerrar PreparedStatement en updatePassword: " + e.getMessage());
-            }
-            conn.disconnect();
-        }
-        return res;
+        return empleados;
     }
 }

@@ -15,7 +15,6 @@ public class CrearBono extends JFrame {
     private JTextField txtValor;
     private JComboBox<CBOption> cbEstado;
     private JComboBox<CBOption> cbOperacion;
-    private JComboBox<CBOption> cbPlanilla;
     private JButton btnConfirmar;
     private JButton btnCancelar;
     private BonoDAO bonoDAO;
@@ -61,7 +60,6 @@ public class CrearBono extends JFrame {
         txtValor.setEnabled(false);
         cbEstado.setEnabled(false);
         cbOperacion.setEnabled(false);
-        cbPlanilla.setEnabled(false);
         btnConfirmar.setText("Eliminar");
     }
 
@@ -70,7 +68,6 @@ public class CrearBono extends JFrame {
         txtValor.setText(String.valueOf(bonoExistente.getValor()));
         setComboBoxValue(cbEstado, bonoExistente.getEstado());
         setComboBoxValue(cbOperacion, bonoExistente.getOperacion());
-        setComboBoxValue(cbPlanilla, bonoExistente.getPlanilla());
     }
 
     private void setComboBoxValue(JComboBox<CBOption> comboBox, byte value) {
@@ -130,16 +127,7 @@ public class CrearBono extends JFrame {
         cbOperacion.addItem(new CBOption("No Fija", (byte)0));
         panel.add(cbOperacion, gbc);
 
-        // Planilla
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        panel.add(new JLabel("Planilla:"), gbc);
 
-        gbc.gridx = 1;
-        cbPlanilla = new JComboBox<>();
-        cbPlanilla.addItem(new CBOption("Mensual", (byte)1));
-        cbPlanilla.addItem(new CBOption("Quincenal", (byte)0));
-        panel.add(cbPlanilla, gbc);
 
         // Botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -192,15 +180,13 @@ public class CrearBono extends JFrame {
 
             CBOption estadoOption = (CBOption) cbEstado.getSelectedItem();
             CBOption operacionOption = (CBOption) cbOperacion.getSelectedItem();
-            CBOption planillaOption = (CBOption) cbPlanilla.getSelectedItem();
 
             Bonos bono = new Bonos(
                     (operacion == CUD.UPDATE || operacion == CUD.DELETE) && bonoExistente != null ? bonoExistente.getId() : 0,
                     txtNombre.getText().trim(),
                     operacion == CUD.DELETE ? 0 : Double.parseDouble(txtValor.getText()),
                     (byte) estadoOption.getValue(),
-                    (byte) operacionOption.getValue(),
-                    (byte) planillaOption.getValue()
+                    (byte) operacionOption.getValue()
             );
 
             boolean resultado = false;

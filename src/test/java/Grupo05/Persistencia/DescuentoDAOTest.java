@@ -29,8 +29,6 @@ class DescuentoDAOTest {
                 "El estado del descuento creado debe ser igual al original.");
         assertEquals(descuento.getOperacion(), res.getOperacion(),
                 "La operación del descuento creado debe ser igual al original.");
-        assertEquals(descuento.getPlanilla(), res.getPlanilla(),
-                "El planilla del descuento creado debe ser igual al original.");
 
         return res;
     }
@@ -41,7 +39,6 @@ class DescuentoDAOTest {
         descuento.setValor(descuento.getValor() + 10.0);
         descuento.setEstado((byte)(descuento.getEstado() == 1 ? 0 : 1));
         descuento.setOperacion((byte)(descuento.getOperacion() == 1 ? 0 : 1));
-        descuento.setPlanilla((byte)(descuento.getPlanilla() == 1 ? 0 : 1));
 
         boolean res = descuentoDAO.update(descuento);
         assertTrue(res, "La actualización del descuento debería ser exitosa.");
@@ -63,8 +60,7 @@ class DescuentoDAOTest {
                 "El estado del descuento obtenido debe ser igual al esperado.");
         assertEquals(descuento.getOperacion(), res.getOperacion(),
                 "La operación del descuento obtenido debe ser igual al esperado.");
-        assertEquals(descuento.getPlanilla(), res.getPlanilla(),
-                "El planilla del descuento obtenido debe ser igual al esperado.");
+
     }
 
     private void search(Descuentos descuento) throws SQLException {
@@ -100,7 +96,6 @@ class DescuentoDAOTest {
                 nombreDescuento,
                 50.0,
                 (byte)1,
-                (byte)1,
                 (byte)1
         );
 
@@ -124,8 +119,7 @@ class DescuentoDAOTest {
                 "Descuento por tardanza",
                 25.0,
                 (byte)1,
-                (byte)0,
-                (byte)1
+                (byte)0
         );
 
         Descuentos res = descuentoDAO.create(descuento);
@@ -160,7 +154,6 @@ class DescuentoDAOTest {
                 0,
                 "Descuento Temporal",
                 30.0,
-                (byte)1,
                 (byte)1,
                 (byte)1
         );

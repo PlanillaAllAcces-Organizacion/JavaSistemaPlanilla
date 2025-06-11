@@ -15,7 +15,6 @@ public class CrearDescuento extends JFrame {
     private JTextField txtValor;
     private JComboBox<CBOption> cbEstado;
     private JComboBox<CBOption> cbOperacion;
-    private JComboBox<CBOption> cbPlanilla;
     private JButton btnConfirmar;
     private JButton btnCancelar;
     private DescuentoDAO descuentoDAO;
@@ -61,7 +60,6 @@ public class CrearDescuento extends JFrame {
         txtValor.setEnabled(false);
         cbEstado.setEnabled(false);
         cbOperacion.setEnabled(false);
-        cbPlanilla.setEnabled(false);
         btnConfirmar.setText("Eliminar");
     }
 
@@ -70,7 +68,6 @@ public class CrearDescuento extends JFrame {
         txtValor.setText(String.valueOf(descuentoExistente.getValor()));
         setComboBoxValue(cbEstado, descuentoExistente.getEstado());
         setComboBoxValue(cbOperacion, descuentoExistente.getOperacion());
-        setComboBoxValue(cbPlanilla, descuentoExistente.getPlanilla());
     }
 
     private void setComboBoxValue(JComboBox<CBOption> comboBox, byte value) {
@@ -135,12 +132,6 @@ public class CrearDescuento extends JFrame {
         gbc.gridy = 4;
         panel.add(new JLabel("Planilla:"), gbc);
 
-        gbc.gridx = 1;
-        cbPlanilla = new JComboBox<>();
-        cbPlanilla.addItem(new CBOption("Mensual", (byte)1));
-        cbPlanilla.addItem(new CBOption("Quincenal", (byte)0));
-        panel.add(cbPlanilla, gbc);
-
         // Botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         btnConfirmar = new JButton(operacion == CUD.DELETE ? "Eliminar" : "Guardar");
@@ -194,7 +185,6 @@ public class CrearDescuento extends JFrame {
 
             CBOption estadoOption = (CBOption) cbEstado.getSelectedItem();
             CBOption operacionOption = (CBOption) cbOperacion.getSelectedItem();
-            CBOption planillaOption = (CBOption) cbPlanilla.getSelectedItem();
 
             Descuentos descuento = new Descuentos(
                     (operacion == CUD.UPDATE || operacion == CUD.DELETE) && descuentoExistente != null ?
@@ -202,8 +192,7 @@ public class CrearDescuento extends JFrame {
                     txtNombre.getText().trim(),
                     operacion == CUD.DELETE ? 0 : Double.parseDouble(txtValor.getText()),
                     (byte) estadoOption.getValue(),
-                    (byte) operacionOption.getValue(),
-                    (byte) planillaOption.getValue()
+                    (byte) operacionOption.getValue()
             );
 
             boolean resultado = false;

@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 public class BonoDAO {
     private ConnectionManager conn;
@@ -25,7 +26,7 @@ public class BonoDAO {
         Bonos res = null;
         try {
             ps = conn.connect().prepareStatement(
-                    "INSERT INTO Bono (NombreBono, Valor, Estado, Operacion, Planilla) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO Bono (NombreBono, Valor, Estado, Operacion) VALUES (?, ?, ?, ?)",
                     PreparedStatement.RETURN_GENERATED_KEYS
             );
 
@@ -33,7 +34,6 @@ public class BonoDAO {
             ps.setDouble(2, bono.getValor());
             ps.setByte(3, bono.getEstado());
             ps.setByte(4, bono.getOperacion());
-            ps.setByte(5, bono.getPlanilla());
 
             int affectedRows = ps.executeUpdate();
 
@@ -62,15 +62,14 @@ public class BonoDAO {
         boolean res = false;
         try {
             ps = conn.connect().prepareStatement(
-                    "UPDATE Bono SET NombreBono = ?, Valor = ?, Estado = ?, Operacion = ?, Planilla = ? WHERE Id = ?"
+                    "UPDATE Bono SET NombreBono = ?, Valor = ?, Estado = ?, Operacion = ? WHERE Id = ?"
             );
 
             ps.setString(1, bono.getNombreBono());
             ps.setDouble(2, bono.getValor());
             ps.setByte(3, bono.getEstado());
             ps.setByte(4, bono.getOperacion());
-            ps.setByte(5, bono.getPlanilla());
-            ps.setInt(6, bono.getId());
+            ps.setInt(5, bono.getId());
 
             res = ps.executeUpdate() > 0;
         } catch (SQLException ex) {
@@ -115,7 +114,7 @@ public class BonoDAO {
         Bonos bono = null;
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, NombreBono, Valor, Estado, Operacion, Planilla FROM Bono WHERE Id = ?"
+                    "SELECT Id, NombreBono, Valor, Estado, Operacion FROM Bono WHERE Id = ?"
             );
 
             ps.setInt(1, id);
@@ -128,7 +127,6 @@ public class BonoDAO {
                 bono.setValor(rs.getDouble("Valor"));
                 bono.setEstado(rs.getByte("Estado"));
                 bono.setOperacion(rs.getByte("Operacion"));
-                bono.setPlanilla(rs.getByte("Planilla"));
             }
         } catch (SQLException ex) {
             throw new SQLException("Error al obtener bono por ID: " + ex.getMessage(), ex);
@@ -148,7 +146,7 @@ public class BonoDAO {
         ArrayList<Bonos> bonos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, NombreBono, Valor, Estado, Operacion, Planilla FROM Bono WHERE NombreBono LIKE ?"
+                    "SELECT Id, NombreBono, Valor, Estado, Operacion FROM Bono WHERE NombreBono LIKE ?"
             );
 
             ps.setString(1, "%" + nombre + "%");
@@ -161,7 +159,6 @@ public class BonoDAO {
                 bono.setValor(rs.getDouble("Valor"));
                 bono.setEstado(rs.getByte("Estado"));
                 bono.setOperacion(rs.getByte("Operacion"));
-                bono.setPlanilla(rs.getByte("Planilla"));
                 bonos.add(bono);
             }
         } catch (SQLException ex) {
@@ -181,7 +178,7 @@ public class BonoDAO {
         ArrayList<Bonos> bonos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, NombreBono, Valor, Estado, Operacion, Planilla FROM Bono"
+                    "SELECT Id, NombreBono, Valor, Estado, Operacion FROM Bono"
             );
 
             rs = ps.executeQuery();
@@ -193,7 +190,6 @@ public class BonoDAO {
                 bono.setValor(rs.getDouble("Valor"));
                 bono.setEstado(rs.getByte("Estado"));
                 bono.setOperacion(rs.getByte("Operacion"));
-                bono.setPlanilla(rs.getByte("Planilla"));
                 bonos.add(bono);
             }
         } catch (SQLException ex) {
@@ -216,4 +212,6 @@ public class BonoDAO {
             System.err.println("Error al cerrar recursos: " + e.getMessage());
         }
     }
+
+
 }

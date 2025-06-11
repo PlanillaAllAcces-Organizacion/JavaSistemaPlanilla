@@ -33,6 +33,13 @@ public class MainForm extends JFrame {
         JMenuItem itemUsers = new JMenuItem("Usuarios"); // Crea un nuevo elemento de menú llamado "Usuarios".
         menuMantenimiento.add(itemUsers); // Agrega el elemento "Usuarios" al menú "Mantenimientos".
         itemUsers.addActionListener(e -> { // Agrega un ActionListener al elemento "Usuarios".
+            UserReadingForm userReadingForm = new UserReadingForm(this); // Cuando se hace clic, crea una nueva instancia de UserReadingForm (formulario para leer/listar usuarios), pasándole la instancia actual de MainForm como padre.
+            userReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
+        });
+
+        JMenuItem itemEmpleados = new JMenuItem("Empleados"); // Crea un nuevo elemento de menú llamado "Empleados".
+        menuMantenimiento.add(itemEmpleados); // Agrega el elemento "Usuarios" al menú "Mantenimientos".
+        itemEmpleados.addActionListener(e -> { // Agrega un ActionListener al elemento "Usuarios".
             EmpleadoReadingForm empleadoReadingForm = new EmpleadoReadingForm(this); // Cuando se hace clic, crea una nueva instancia de UserReadingForm (formulario para leer/listar usuarios), pasándole la instancia actual de MainForm como padre.
             empleadoReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
         });

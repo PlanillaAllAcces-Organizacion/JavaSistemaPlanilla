@@ -7,14 +7,15 @@ import Grupo05.Persistencia.TipoHorarioDAO;
 import Grupo05.Utils.CUD;
 import Grupo05.Utils.ComBo;
 import Grupo05.dominio.Empleado;
-import Grupo05.dominio.Horario;
 import Grupo05.dominio.PuestoTrabajo;
+import Grupo05.dominio.Horario;
 
 import java.sql.SQLException;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-
 
 public class EmpleadosForm extends JDialog{
     private JTextField txtDui;
@@ -31,33 +32,31 @@ public class EmpleadosForm extends JDialog{
     private JComboBox cbEstado;
     private JComboBox cbPuesto;
     private JComboBox cbHorario;
-    private JLabel lbPassword;
-    private JPasswordField txtPassword;
+
 
     private EmpleadoDAO empleadoDAO; // Instancia de EmpleadoDAO
-    private TipoHorarioDAO tipoHorarioDAO;
-    private PuestoTrabajoDAO puestoTrabajoDAO;
     private MainForm mainForm; // Referencia a la ventana principal
     private CUD cud; // Tipo de operación (CREATE, UPDATE, DELETE)
     private Empleado en; // Objeto Empleado que se está manipulando
+    private TipoHorarioDAO tipoHorarioDAO;       // Declarado aquí
+    private PuestoTrabajoDAO puestoTrabajoDAO; // Declarado aquí
 
-    // Constructor de la clase EmpleadoForm
-    public EmpleadosForm(MainForm mainForm, CUD cud, Empleado empleado) {
+    public EmpleadosForm(MainForm mainForm, CUD cud, Empleado empleado){
         this.cud = cud;
         this.en = empleado;
         this.mainForm = mainForm;
-        empleadoDAO = new EmpleadoDAO(); // Crea una nueva instancia de EmpleadoDAO
-        tipoHorarioDAO = new TipoHorarioDAO();       // <--- ¡AGREGA ESTO! (O new TipoHorarioDAO() si así la llamaste)
+
+        empleadoDAO = new EmpleadoDAO();
         puestoTrabajoDAO = new PuestoTrabajoDAO();
+        tipoHorarioDAO = new TipoHorarioDAO();
         setContentPane(mainPanel);
         setModal(true);
-        init(); // Llama al método 'init' para inicializar el formulario
+        init();
         pack();
         setLocationRelativeTo(mainForm);
 
         BtnCancelar.addActionListener(s -> this.dispose());
         BtnGuardar.addActionListener(s -> ok());
-        txtFecha.setEditable(false);
     }
 
     private void init() {
@@ -82,13 +81,6 @@ public class EmpleadosForm extends JDialog{
         setValuesControls(this.en); // Llena los campos con los valores del empleado
     }
 
-    private void initCBEstado() {
-        DefaultComboBoxModel<ComBo> model = (DefaultComboBoxModel<ComBo>) cbEstado.getModel();
-        model.addElement(new ComBo("ACTIVO", (byte)1));
-        model.addElement(new ComBo("INACTIVO", (byte)2));
-    }
-
-    // Método para inicializar ComboBoxes adicionales (Tipo de Horario, Puesto de Trabajo)
     private void initCBsAdicionales() {
         // --- ComboBox Tipo de Horario ---
         DefaultComboBoxModel<ComBo> modelHorario = (DefaultComboBoxModel<ComBo>) cbHorario.getModel();
@@ -121,6 +113,14 @@ public class EmpleadosForm extends JDialog{
         }
     }
 
+    private void initCBEstado() {
+        DefaultComboBoxModel<ComBo> model = (DefaultComboBoxModel<ComBo>) cbEstado.getModel();
+        model.addElement(new ComBo("ACTIVO", (byte)1));
+        model.addElement(new ComBo("INACTIVO", (byte)2));
+    }
+
+    // Método para inicializar ComboBoxes adicionales (Tipo de Horario, Puesto de Trabajo)
+
 
 
     private void setValuesControls(Empleado empleado) {
@@ -132,7 +132,6 @@ public class EmpleadosForm extends JDialog{
         txtTelefono.setText(String.valueOf(empleado.getTelefono()));
         txtCorreo.setText(empleado.getCorreo());
         txtSalario.setText(String.valueOf(empleado.getSalario()));
-
 
         // Manejo de la fecha de contrato
         if (this.cud == CUD.CREATE) {
@@ -148,7 +147,6 @@ public class EmpleadosForm extends JDialog{
                     empleado.getFechacontra().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")) : "");
         }
 
-        txtUsuario.setText(empleado.getUsuario());
 
         // Seleccionar estado en ComboBox
         cbEstado.setSelectedItem(new ComBo(null, empleado.getEstado()));
@@ -173,19 +171,11 @@ public class EmpleadosForm extends JDialog{
             txtTelefono.setEditable(false);
             txtCorreo.setEditable(false);
             txtSalario.setEditable(false);
-            txtUsuario.setEditable(false);
-            txtPassword.setVisible(false); // Ocultar campo de password
-            lbPassword.setVisible(false); // Ocultar etiqueta de password
             cbEstado.setEnabled(false);
             cbHorario.setEnabled(false);
             cbPuesto.setEnabled(false);
         }
 
-        // Si no es creación, ocultar campo de contraseña (ya que no se edita directamente aquí)
-        if (this.cud != CUD.CREATE) {
-            txtPassword.setVisible(false);
-            lbPassword.setVisible(false);
-        }
     }
 
     private boolean getValuesControls() {
@@ -204,7 +194,6 @@ public class EmpleadosForm extends JDialog{
                 txtApellido.getText().trim().isEmpty() ||
                 txtDui.getText().trim().isEmpty() ||
                 txtCorreo.getText().trim().isEmpty() ||
-                txtUsuario.getText().trim().isEmpty() ||
                 estado == (byte) 0 || tipoDeHorarioId == 0 || puestoTrabajoId == 0) {
             JOptionPane.showMessageDialog(null,
                     "Los campos con * son obligatorios y los ComboBoxes deben tener una selección válida.",
@@ -238,9 +227,14 @@ public class EmpleadosForm extends JDialog{
             return false;
         }
 
-
-        if (this.en.getFechacontra() == null) {
-            JOptionPane.showMessageDialog(null, "La fecha de contrato no pudo ser establecida.", "Error Interno", JOptionPane.ERROR_MESSAGE);
+        // Validación y parseo de Fecha de Contrato (LocalDateTime)
+        LocalDateTime fechaContrato;
+        try {
+            // Asegúrate de que el formato de entrada coincida con el formato de parseo.
+            // Por ejemplo, "2025-06-08T10:30:00"
+            fechaContrato = LocalDateTime.parse(txtFecha.getText().trim());
+        } catch (DateTimeParseException e) {
+            JOptionPane.showMessageDialog(null, "Formato de fecha de contrato inválido. Use YYYY-MM-DDTHH:MM:SS (ej: 2025-06-08T10:30:00).", "Validación", JOptionPane.WARNING_MESSAGE);
             return false;
         }
 
@@ -255,17 +249,7 @@ public class EmpleadosForm extends JDialog{
         this.en.setCorreo(txtCorreo.getText().trim());
         this.en.setEstado(estado);
         this.en.setSalario(salario);
-        this.en.setUsuario(txtUsuario.getText().trim());
-
-        // Para CREATE, también validar y asignar la contraseña
-        if (this.cud == CUD.CREATE) {
-            String password = new String(txtPassword.getPassword());
-            if (password.trim().isEmpty()) {
-                JOptionPane.showMessageDialog(null, "La contraseña es obligatoria para nuevos empleados.", "Validación", JOptionPane.WARNING_MESSAGE);
-                return false;
-            }
-            this.en.setPasswordHash(password);
-        }
+        this.en.setFechacontra(fechaContrato);
 
         return true;
     }
@@ -275,12 +259,12 @@ public class EmpleadosForm extends JDialog{
             boolean res = getValuesControls(); // Obtener y validar los valores del formulario
 
             if (res) { // Si la validación fue exitosa
-                boolean r = true; // Resultado de la operación de base de datos
+                boolean r = false; // Resultado de la operación de base de datos
 
                 switch (this.cud) {
                     case CREATE:
                         Empleado nuevoEmpleado = empleadoDAO.create(this.en);
-                        if (nuevoEmpleado.getId() > 0) {
+                        if (nuevoEmpleado != null && nuevoEmpleado.getId() > 0) {
                             r = true;
                         }
                         break;
@@ -311,4 +295,5 @@ public class EmpleadosForm extends JDialog{
         }
     }
 }
+
 

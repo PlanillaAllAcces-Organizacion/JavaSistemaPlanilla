@@ -1,16 +1,15 @@
 package Grupo05.Formularios;
 
 import Grupo05.Persistencia.EmpleadoDAO;
+import Grupo05.dominio.Empleado;
 
-import javax.swing.*; // Importa el paquete Swing, que proporciona clases para crear interfaces gráficas de usuario.
-import javax.swing.table.DefaultTableModel; // Importa la clase DefaultTableModel, utilizada para crear y manipular modelos de datos para JTable.
-import Grupo05.dominio.Empleado; // Importa la clase User, que representa la entidad de usuario en el dominio de la aplicación.
-import Grupo05.Utils.CUD; // Importa el enum  CUD (Create, Update, Delete).
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import Grupo05.Utils.CUD;
 
-import java.awt.event.KeyAdapter; // Importa la clase KeyAdapter, una clase adaptadora para recibir eventos de teclado.
-import java.awt.event.KeyEvent; // Importa la clase KeyEvent, que representa un evento de teclado.
-import java.util.ArrayList; // Importa la clase ArrayList, una implementación de la interfaz List que permite almacenar colecciones dinámicas de objetos.
-
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 
 public class EmpleadoReadingForm extends JDialog {
     private JTextField txtName;
@@ -19,10 +18,14 @@ public class EmpleadoReadingForm extends JDialog {
     private JButton btnEliminar;
     private JTable tableEmpleados;
     private JPanel mainPanel;
+    private JButton button1;
+    private JButton btnsBono;
+    private JButton btnsDescuento;
 
-    private EmpleadoDAO empleadoDAO;
-    private MainForm mainForm;
+    private EmpleadoDAO empleadoDAO; // Instancia de UserDAO para realizar operaciones de base de datos de usuarios.
+    private MainForm mainForm; //
 
+    // Constructor de la clase UserReadingForm. Recibe una instancia de MainForm como parámetro.
     public EmpleadoReadingForm(MainForm mainForm) {
         this.mainForm = mainForm;
         empleadoDAO = new EmpleadoDAO();
@@ -91,7 +94,7 @@ public class EmpleadoReadingForm extends JDialog {
 
     private void search(String query) {
         try {
-            ArrayList<Empleado> empleados = empleadoDAO.search(query); // Usa el método search de EmpleadoDAO
+            ArrayList<Empleado> empleados = empleadoDAO.search(query);
             createTable(empleados);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(null,
@@ -115,13 +118,10 @@ public class EmpleadoReadingForm extends JDialog {
         model.addColumn("DUI");
         model.addColumn("Teléfono");
         model.addColumn("Correo");
-        model.addColumn("Usuario");
         model.addColumn("Estado");
-        // Puedes añadir más columnas si lo deseas, como Puesto de Trabajo, Horario, etc.
 
         this.tableEmpleados.setModel(model);
 
-        // Llenar la tabla con los datos de los empleados
         for (Empleado empleado : empleados) {
             model.addRow(new Object[]{
                     empleado.getId(),
@@ -130,7 +130,6 @@ public class EmpleadoReadingForm extends JDialog {
                     empleado.getDui(),
                     empleado.getTelefono(),
                     empleado.getCorreo(),
-                    empleado.getUsuario(),
                     empleado.getEstado() // Asumiendo que Empleado tiene un getStrEstado() similar a PuestoTrabajo
             });
         }
@@ -145,32 +144,22 @@ public class EmpleadoReadingForm extends JDialog {
         this.tableEmpleados.getTableHeader().getColumnModel().getColumn(pColumna).setMinWidth(0);
     }
 
+    // Método para obtener el Empleado seleccionado de la fila de la tabla.
     private Empleado getEmpleadoFromTableRow() {
+        Empleado empleado = null;
         try {
             int filaSelect = this.tableEmpleados.getSelectedRow();
-
             if (filaSelect == -1) {
                 JOptionPane.showMessageDialog(null,
-                        "Seleccionar una fila de la tabla.",
+                        "Selecciona una fila de la tabla.",
                         "Validación", JOptionPane.WARNING_MESSAGE);
                 return null;
             }
 
-            // Obtener el ID desde la tabla
-            Object idObj = this.tableEmpleados.getValueAt(filaSelect, 0);
-            if (!(idObj instanceof Integer)) {
-                JOptionPane.showMessageDialog(null,
-                        "El ID del empleado no es válido.",
-                        "Error", JOptionPane.ERROR_MESSAGE);
-                return null;
-            }
+            int id = (int) this.tableEmpleados.getValueAt(filaSelect, 0); // Obtener ID de la primera columna
+            empleado = empleadoDAO.getById(id); // Buscar el empleado por ID
 
-            int id = (int) idObj;
-            System.out.println("ID seleccionado: " + id);
-
-            Empleado empleado = empleadoDAO.getById(id);
-
-            if (empleado == null) {
+            if (empleado == null) { // Si getById devuelve null, no se encontró
                 JOptionPane.showMessageDialog(null,
                         "No se encontró ningún empleado con el ID seleccionado.",
                         "Validación", JOptionPane.WARNING_MESSAGE);
@@ -185,5 +174,5 @@ public class EmpleadoReadingForm extends JDialog {
             return null;
         }
     }
-
 }
+
