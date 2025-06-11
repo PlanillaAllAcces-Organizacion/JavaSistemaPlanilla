@@ -25,7 +25,7 @@ public class DescuentoDAO {
         Descuentos res = null;
         try {
             ps = conn.connect().prepareStatement(
-                    "INSERT INTO Descuento (Nombre, Valor, Estado, Operacion, Planilla) VALUES (?, ?, ?, ?, ?)",
+                    "INSERT INTO Descuento (Nombre, Valor, Estado, Operacion) VALUES (?, ?, ?, ? )",
                     PreparedStatement.RETURN_GENERATED_KEYS
             );
 
@@ -33,7 +33,6 @@ public class DescuentoDAO {
             ps.setDouble(2, descuento.getValor());
             ps.setByte(3, descuento.getEstado());
             ps.setByte(4, descuento.getOperacion());
-            ps.setByte(5, descuento.getPlanilla());
 
             int affectedRows = ps.executeUpdate();
 
@@ -62,15 +61,14 @@ public class DescuentoDAO {
         boolean res = false;
         try {
             ps = conn.connect().prepareStatement(
-                    "UPDATE Descuento SET Nombre = ?, Valor = ?, Estado = ?, Operacion = ?, Planilla = ? WHERE Id = ?"
+                    "UPDATE Descuento SET Nombre = ?, Valor = ?, Estado = ?, Operacion = ? WHERE Id = ?"
             );
 
             ps.setString(1, descuento.getNombre());
             ps.setDouble(2, descuento.getValor());
             ps.setByte(3, descuento.getEstado());
             ps.setByte(4, descuento.getOperacion());
-            ps.setByte(5, descuento.getPlanilla());
-            ps.setInt(6, descuento.getId());
+            ps.setInt(5, descuento.getId());
 
             res = ps.executeUpdate() > 0;
         } catch (SQLException ex) {
@@ -144,7 +142,7 @@ public class DescuentoDAO {
         Descuentos descuento = null;
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, Nombre, Valor, Estado, Operacion, Planilla FROM Descuento WHERE Id = ?"
+                    "SELECT Id, Nombre, Valor, Estado, Operacion FROM Descuento WHERE Id = ?"
             );
 
             ps.setInt(1, id);
@@ -157,7 +155,6 @@ public class DescuentoDAO {
                 descuento.setValor(rs.getDouble("Valor"));
                 descuento.setEstado(rs.getByte("Estado"));
                 descuento.setOperacion(rs.getByte("Operacion"));
-                descuento.setPlanilla(rs.getByte("Planilla"));
             }
         } catch (SQLException ex) {
             throw new SQLException("Error al obtener descuento por ID: " + ex.getMessage(), ex);
@@ -177,7 +174,7 @@ public class DescuentoDAO {
         ArrayList<Descuentos> descuentos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, Nombre, Valor, Estado, Operacion, Planilla FROM Descuento WHERE Nombre LIKE ?"
+                    "SELECT Id, Nombre, Valor, Estado, Operacion FROM Descuento WHERE Nombre LIKE ?"
             );
 
             ps.setString(1, "%" + nombre + "%");
@@ -190,7 +187,6 @@ public class DescuentoDAO {
                 descuento.setValor(rs.getDouble("Valor"));
                 descuento.setEstado(rs.getByte("Estado"));
                 descuento.setOperacion(rs.getByte("Operacion"));
-                descuento.setPlanilla(rs.getByte("Planilla"));
                 descuentos.add(descuento);
             }
         } catch (SQLException ex) {
@@ -210,7 +206,7 @@ public class DescuentoDAO {
         ArrayList<Descuentos> descuentos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, Nombre, Valor, Estado, Operacion, Planilla FROM Descuento"
+                    "SELECT Id, Nombre, Valor, Estado, Operacion FROM Descuento"
             );
 
             rs = ps.executeQuery();
@@ -222,7 +218,6 @@ public class DescuentoDAO {
                 descuento.setValor(rs.getDouble("Valor"));
                 descuento.setEstado(rs.getByte("Estado"));
                 descuento.setOperacion(rs.getByte("Operacion"));
-                descuento.setPlanilla(rs.getByte("Planilla"));
                 descuentos.add(descuento);
             }
         } catch (SQLException ex) {
@@ -242,7 +237,7 @@ public class DescuentoDAO {
         ArrayList<Descuentos> descuentos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, Nombre, Valor, Estado, Operacion, Planilla FROM Descuento WHERE Estado = 1"
+                    "SELECT Id, Nombre, Valor, Estado, Operacion FROM Descuento WHERE Estado = 1"
             );
 
             rs = ps.executeQuery();
@@ -254,7 +249,6 @@ public class DescuentoDAO {
                 descuento.setValor(rs.getDouble("Valor"));
                 descuento.setEstado(rs.getByte("Estado"));
                 descuento.setOperacion(rs.getByte("Operacion"));
-                descuento.setPlanilla(rs.getByte("Planilla"));
                 descuentos.add(descuento);
             }
         } catch (SQLException ex) {

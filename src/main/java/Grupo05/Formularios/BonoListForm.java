@@ -99,7 +99,7 @@ public class BonoListForm extends JFrame {
 
     private void updateTableModel(ArrayList<Bonos> bonos) {
         DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"ID", "Nombre", "Valor", "Estado", "Operación", "Planilla"},
+                new Object[]{"ID", "Nombre", "Valor", "Estado", "Operación"},
                 0
         ) {
             @Override
@@ -114,8 +114,7 @@ public class BonoListForm extends JFrame {
                     bono.getNombreBono(),
                     bono.getValor(),
                     bono.getEstado() == 1 ? "Activo" : "Inactivo",
-                    bono.getOperacion() == 1 ? "Fijo" : "No Fijo",
-                    bono.getPlanilla() == 1 ? "Mensual" : "Quincenal"
+                    bono.getOperacion() == 1 ? "Fijo" : "No Fijo"
             });
         }
 

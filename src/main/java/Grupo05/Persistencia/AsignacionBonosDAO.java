@@ -39,8 +39,13 @@ public class AsignacionBonosDAO {
 
     public List<AsignacionBonos> getByEmpleadoId(int empleadoId) throws SQLException {
         List<AsignacionBonos> asignaciones = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
         try {
-            ps = conn.connect().prepareStatement(
+            connection = conn.connect();
+            ps = connection.prepareStatement(
                     "SELECT Id, EmpleadosId, BonosId, Estado FROM AsignacionBono WHERE EmpleadosId = ? AND Estado = 1"
             );
             ps.setInt(1, empleadoId);
@@ -54,12 +59,14 @@ public class AsignacionBonosDAO {
                 asignacion.setEstado(rs.getByte("Estado"));
                 asignaciones.add(asignacion);
             }
-            return asignaciones;
         } finally {
-            closeResources();
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            conn.disconnect();
         }
-    }
 
+        return asignaciones;
+    }
     public boolean update(AsignacionBonos asignacion) throws SQLException {
         try {
             ps = conn.connect().prepareStatement(
@@ -81,5 +88,31 @@ public class AsignacionBonosDAO {
         } catch (SQLException e) {
             System.err.println("Error al cerrar recursos: " + e.getMessage());
         }
+    }
+
+    public boolean exists(int empleadoId, int bonoId) throws SQLException {
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+        boolean existe = false;
+
+        try {
+            connection = conn.connect();
+            ps = connection.prepareStatement(
+                    "SELECT COUNT(*) FROM AsignacionBono WHERE EmpleadosId = ? AND BonosId = ? AND Estado = 1"
+            );
+            ps.setInt(1, empleadoId);
+            ps.setInt(2, bonoId);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                existe = rs.getInt(1) > 0;
+            }
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            conn.disconnect();
+        }
+        return existe;
     }
 }

@@ -3,339 +3,296 @@ package Grupo05.Formularios;
 import Grupo05.Persistencia.AsignacionBonosDAO;
 import Grupo05.Persistencia.BonoDAO;
 import Grupo05.Persistencia.EmpleadoDAO;
+import Grupo05.Persistencia.PuestoTrabajoDAO;
 import Grupo05.dominio.AsignacionBonos;
 import Grupo05.dominio.Bonos;
 import Grupo05.dominio.Empleado;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
-public class AsignacionBonosForm extends JFrame {
-    private JTable empleadosTable;
-    private JTable bonosTable;
-    private JButton btnAsignar;
-    private JButton btnDesasignar;
-    private JButton btnRefresh;
-    private JButton btnVerBonosAsignados;
+public class AsignacionBonosForm extends JPanel {
+    private JTable tableEmpleados;
+    private JTable tableBonosAsignados;
+    private JComboBox<Bonos> comboBoxBonos;
+    private JButton asignarBonoButton;
+    private JButton eliminarAsignacionButton;
+
     private EmpleadoDAO empleadoDAO;
     private BonoDAO bonoDAO;
-    private AsignacionBonosDAO asignacionBonoDAO;
-    private JPanel mainPanel;
-    private JTabbedPane tabbedPane;
-    private JComboBox comboBox1;
-    private JTable table1;
-    private JTable table2;
-    private JButton asignarBonoButton;
-    private JButton eliminarAsignaciónButton;
-
+    private AsignacionBonosDAO asignacionBonosDAO;
+    private PuestoTrabajoDAO puestoTrabajoDAO;
+    private Empleado empleadoSeleccionado;
 
     public AsignacionBonosForm() {
+        // Inicializar DAOs
         empleadoDAO = new EmpleadoDAO();
         bonoDAO = new BonoDAO();
-        asignacionBonoDAO = new AsignacionBonosDAO();
+        asignacionBonosDAO = new AsignacionBonosDAO();
+        puestoTrabajoDAO = new PuestoTrabajoDAO();
 
-        initComponents();
-        setTitle("Asignación de Bonos a Empleados");
-        setSize(1000, 700);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-        //loadEmpleados();
-        loadBonosDisponibles();
-    }
+        // Configurar el layout
+        setLayout(new BorderLayout(10, 10));
 
-    private void initComponents() {
-        mainPanel = new JPanel(new BorderLayout());
+        // Panel superior con título
+        JPanel panelTitulo = new JPanel();
+        JLabel tituloLabel = new JLabel("Asignación de Bonos a Empleados");
+        tituloLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        panelTitulo.add(tituloLabel);
+        add(panelTitulo, BorderLayout.NORTH);
 
-        // Pestañas para organizar la información
-        tabbedPane = new JTabbedPane();
-
-        // Panel para empleados
-        JPanel empleadosPanel = new JPanel(new BorderLayout());
+        // Panel central con tablas
+        JPanel panelCentral = new JPanel(new GridLayout(1, 2, 10, 10));
 
         // Tabla de empleados
-        empleadosTable = new JTable();
-        empleadosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane empleadosScrollPane = new JScrollPane(empleadosTable);
-        empleadosPanel.add(empleadosScrollPane, BorderLayout.CENTER);
+        JPanel panelEmpleados = new JPanel(new BorderLayout());
+        panelEmpleados.add(new JLabel("Empleados:"), BorderLayout.NORTH);
+        tableEmpleados = new JTable();
+        tableEmpleados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        panelEmpleados.add(new JScrollPane(tableEmpleados), BorderLayout.CENTER);
+        panelCentral.add(panelEmpleados);
 
-        JPanel empleadosButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnVerBonosAsignados = new JButton("Ver Bonos Asignados");
-        btnVerBonosAsignados.addActionListener(e -> mostrarBonosAsignados());
-        btnRefresh = new JButton("Actualizar");
-        btnRefresh.addActionListener(e -> {
-            //loadEmpleados();
-            loadBonosDisponibles();
+        // Tabla de bonos asignados
+        JPanel panelBonos = new JPanel(new BorderLayout());
+        panelBonos.add(new JLabel("Bonos Asignados:"), BorderLayout.NORTH);
+        tableBonosAsignados = new JTable();
+        panelBonos.add(new JScrollPane(tableBonosAsignados), BorderLayout.CENTER);
+        panelCentral.add(panelBonos);
+
+        add(panelCentral, BorderLayout.CENTER);
+
+        // Panel inferior con controles
+        JPanel panelInferior = new JPanel(new BorderLayout(10, 10));
+
+        // Panel para selección de bonos
+        JPanel panelSeleccionBono = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        panelSeleccionBono.add(new JLabel("Bono a asignar:"));
+        comboBoxBonos = new JComboBox<>();
+        panelSeleccionBono.add(comboBoxBonos);
+        panelInferior.add(panelSeleccionBono, BorderLayout.CENTER);
+
+        // Panel de botones
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 10));
+        asignarBonoButton = new JButton("Asignar Bono");
+        eliminarAsignacionButton = new JButton("Eliminar Asignación");
+        panelBotones.add(asignarBonoButton);
+        panelBotones.add(eliminarAsignacionButton);
+        panelInferior.add(panelBotones, BorderLayout.SOUTH);
+
+        add(panelInferior, BorderLayout.SOUTH);
+
+        // Cargar datos iniciales
+        cargarEmpleados();
+        cargarBonosDisponibles();
+
+        // Configurar eventos
+        tableEmpleados.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = tableEmpleados.getSelectedRow();
+                if (selectedRow >= 0) {
+                    int empleadoId = (int) tableEmpleados.getValueAt(selectedRow, 0);
+                    try {
+                        empleadoSeleccionado = empleadoDAO.getById(empleadoId);
+                        cargarBonosAsignados();
+                    } catch (SQLException ex) {
+                        mostrarError("Error al cargar empleado: " + ex.getMessage());
+                    }
+                }
+            }
         });
 
-        empleadosButtonPanel.add(btnVerBonosAsignados);
-        empleadosButtonPanel.add(btnRefresh);
-        empleadosPanel.add(empleadosButtonPanel, BorderLayout.SOUTH);
-
-        // Panel para bonos
-        JPanel bonosPanel = new JPanel(new BorderLayout());
-
-        // Tabla de bonos disponibles
-        bonosTable = new JTable();
-        bonosTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        JScrollPane bonosScrollPane = new JScrollPane(bonosTable);
-        bonosPanel.add(bonosScrollPane, BorderLayout.CENTER);
-
-        // Panel de botones para bonos
-        JPanel bonosButtonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        btnAsignar = new JButton("Asignar Bono");
-        btnAsignar.addActionListener(e -> asignarBono());
-        btnDesasignar = new JButton("Desasignar Bono");
-        btnDesasignar.addActionListener(e -> desasignarBono());
-
-        bonosButtonPanel.add(btnAsignar);
-        bonosButtonPanel.add(btnDesasignar);
-        bonosPanel.add(bonosButtonPanel, BorderLayout.SOUTH);
-
-        // Agregar pestañas al panel principal
-        tabbedPane.addTab("Empleados", empleadosPanel);
-        tabbedPane.addTab("Bonos Disponibles", bonosPanel);
-
-        mainPanel.add(tabbedPane, BorderLayout.CENTER);
-        add(mainPanel);
+        asignarBonoButton.addActionListener(e -> asignarBono());
+        eliminarAsignacionButton.addActionListener(e -> eliminarAsignacion());
     }
-//
-//    private void loadEmpleados() {
-//        try {
-//            List<Empleado> empleados = empleadoDAO.getAll();
-//            updateEmpleadosTableModel(empleados);
-//        } catch (SQLException ex) {
-//            showError("Error al cargar empleados: " + ex.getMessage());
-//            ex.printStackTrace();
-//        }
-//    }
 
-    private void loadBonosDisponibles() {
+    private void cargarEmpleados() {
         try {
-            List<Bonos> bonos = bonoDAO.getAll();
-            updateBonosTableModel(bonos);
-        } catch (SQLException ex) {
-            showError("Error al cargar bonos: " + ex.getMessage());
-        }
-    }
+            List<Empleado> empleados = empleadoDAO.getAllActive();
+            DefaultTableModel model = new DefaultTableModel() {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
+                }
+            };
 
-    private void updateEmpleadosTableModel(List<Empleado> empleados) {
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"ID", "Nombre", "Apellido", "Puesto", "Bonos Asignados"},
-                0
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+            model.addColumn("ID");
+            model.addColumn("Nombre");
+            model.addColumn("Apellido");
+            model.addColumn("DUI");
+            model.addColumn("Cargo");
 
-        for (Empleado empleado : empleados) {
-            try {
-                int bonosAsignados = asignacionBonoDAO.getByEmpleadoId(empleado.getId()).size();
+            for (Empleado empleado : empleados) {
                 model.addRow(new Object[]{
                         empleado.getId(),
                         empleado.getNombre(),
                         empleado.getApellido(),
-                        empleado.getPuestoTrabajoId(),
-                        bonosAsignados
+                        empleado.getDui(),
+                        obtenerNombrePuesto(empleado.getPuestoTrabajoId())
                 });
-            } catch (SQLException ex) {
-                showError("Error al obtener bonos asignados: " + ex.getMessage());
             }
+
+            tableEmpleados.setModel(model);
+        } catch (SQLException ex) {
+            mostrarError("Error al cargar empleados: " + ex.getMessage());
         }
-        empleadosTable.setModel(model);
     }
 
-    private void updateBonosTableModel(List<Bonos> bonos) {
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"ID", "Nombre", "Valor", "Tipo"},
-                0
-        ) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false;
-            }
-        };
+    private String obtenerNombrePuesto(Integer puestoId) {
+        if (puestoId == null) return "Sin asignar";
 
-        for (Bonos bono : bonos) {
-            model.addRow(new Object[]{
-                    bono.getId(),
-                    bono.getNombreBono(),
-                    bono.getValor(),
-                    bono.getOperacion() == 1 ? "Fijo" : "Variable"
+        try {
+            return puestoTrabajoDAO.getNombrePuesto(puestoId);
+        } catch (SQLException e) {
+            return "Puesto " + puestoId;
+        }
+    }
+
+    private void cargarBonosDisponibles() {
+        try {
+            List<Bonos> bonos = bonoDAO.getAll();
+            comboBoxBonos.removeAllItems();
+
+            // Configurar renderer para mostrar solo el nombre
+            comboBoxBonos.setRenderer(new DefaultListCellRenderer() {
+                @Override
+                public Component getListCellRendererComponent(JList<?> list, Object value,
+                                                              int index, boolean isSelected, boolean cellHasFocus) {
+                    super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                    if (value instanceof Bonos) {
+                        setText(((Bonos) value).getNombreBono());
+                    }
+                    return this;
+                }
             });
+
+            for (Bonos bono : bonos) {
+                comboBoxBonos.addItem(bono);
+            }
+        } catch (SQLException ex) {
+            mostrarError("Error al cargar bonos disponibles: " + ex.getMessage());
         }
-        bonosTable.setModel(model);
     }
 
-    private void mostrarBonosAsignados() {
-        int selectedRow = empleadosTable.getSelectedRow();
-        if (selectedRow >= 0) {
-            int idEmpleado = (int) empleadosTable.getModel().getValueAt(selectedRow, 0);
+    private void cargarBonosAsignados() {
+        if (empleadoSeleccionado == null) return;
 
-            try {
-                List<AsignacionBonos> asignaciones = asignacionBonoDAO.getByEmpleadoId(idEmpleado);
-                List<Bonos> bonosAsignados = new ArrayList<>();
-
-                for (AsignacionBonos asignacion : asignaciones) {
-                    Bonos bono = bonoDAO.getById(asignacion.getBonoId());
-                    if (bono != null) {
-                        bonosAsignados.add(bono);
-                    }
+        try {
+            List<AsignacionBonos> asignaciones = asignacionBonosDAO.getByEmpleadoId(empleadoSeleccionado.getId());
+            DefaultTableModel model = new DefaultTableModel() {
+                @Override
+                public boolean isCellEditable(int row, int column) {
+                    return false;
                 }
+            };
 
-                if (!bonosAsignados.isEmpty()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Bonos asignados al empleado:\n\n");
+            model.addColumn("Nombre Bono");
+            model.addColumn("Valor");
+            model.addColumn("Estado");
 
-                    for (Bonos bono : bonosAsignados) {
-                        sb.append("- ").append(bono.getNombreBono())
-                                .append(" ($").append(bono.getValor()).append(")\n");
-                    }
-
-                    JOptionPane.showMessageDialog(this, sb.toString(),
-                            "Bonos Asignados", JOptionPane.INFORMATION_MESSAGE);
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "El empleado no tiene bonos asignados",
-                            "Información", JOptionPane.INFORMATION_MESSAGE);
+            for (AsignacionBonos asignacion : asignaciones) {
+                Bonos bono = bonoDAO.getById(asignacion.getBonoId());
+                if (bono != null) {
+                    model.addRow(new Object[]{
+                            bono.getNombreBono(),  // Solo mostramos el nombre
+                            bono.getValor(),
+                            asignacion.getEstado() == 1 ? "Activo" : "Inactivo"
+                    });
                 }
-            } catch (SQLException ex) {
-                showError("Error al obtener bonos asignados: " + ex.getMessage());
             }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Seleccione un empleado para ver sus bonos asignados",
-                    "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
+
+            tableBonosAsignados.setModel(model);
+        } catch (SQLException ex) {
+            mostrarError("Error al cargar bonos asignados: " + ex.getMessage());
         }
     }
 
     private void asignarBono() {
-        int empleadoSelectedRow = empleadosTable.getSelectedRow();
-        int bonoSelectedRow = bonosTable.getSelectedRow();
+        if (empleadoSeleccionado == null) {
+            mostrarAdvertencia("Seleccione un empleado primero");
+            return;
+        }
 
-        if (empleadoSelectedRow >= 0 && bonoSelectedRow >= 0) {
-            try {
-                int idEmpleado = (int) empleadosTable.getModel().getValueAt(empleadoSelectedRow, 0);
-                int idBono = (int) bonosTable.getModel().getValueAt(bonoSelectedRow, 0);
+        Bonos bonoSeleccionado = (Bonos) comboBoxBonos.getSelectedItem();
+        if (bonoSeleccionado == null) {
+            mostrarAdvertencia("Seleccione un bono para asignar");
+            return;
+        }
 
-                // Verificar si ya está asignado
-                boolean yaAsignado = false;
-                List<AsignacionBonos> asignaciones = asignacionBonoDAO.getByEmpleadoId(idEmpleado);
-                for (AsignacionBonos asignacion : asignaciones) {
-                    if (asignacion.getBonoId() == idBono && asignacion.getEstado() == 1) {
-                        yaAsignado = true;
-                        break;
-                    }
-                }
-
-                if (!yaAsignado) {
-                    AsignacionBonos nuevaAsignacion = new AsignacionBonos(0, idEmpleado, idBono, (byte)1);
-                    AsignacionBonos asignacionCreada = asignacionBonoDAO.create(nuevaAsignacion);
-
-                    if (asignacionCreada != null) {
-                        JOptionPane.showMessageDialog(this,
-                                "Bono asignado exitosamente",
-                                "Éxito",
-                                JOptionPane.INFORMATION_MESSAGE);
-                        //loadEmpleados();
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "Este bono ya está asignado al empleado",
-                            "Advertencia",
-                            JOptionPane.WARNING_MESSAGE);
-                }
-            } catch (SQLException ex) {
-                showError("Error al asignar bono: " + ex.getMessage());
+        try {
+            if (asignacionBonosDAO.exists(empleadoSeleccionado.getId(), bonoSeleccionado.getId())) {
+                mostrarAdvertencia("Este bono ya está asignado al empleado");
+                return;
             }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Seleccione un empleado y un bono para asignar",
-                    "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
+
+            AsignacionBonos asignacion = new AsignacionBonos();
+            asignacion.setEmpleadoId(empleadoSeleccionado.getId());
+            asignacion.setBonoId(bonoSeleccionado.getId());
+            asignacion.setEstado((byte) 1);
+
+            if (asignacionBonosDAO.create(asignacion) != null) {
+                cargarBonosAsignados();
+                mostrarMensaje("Bono asignado correctamente");
+            } else {
+                mostrarError("No se pudo asignar el bono");
+            }
+        } catch (SQLException ex) {
+            mostrarError("Error al asignar bono: " + ex.getMessage());
         }
     }
 
-    private void desasignarBono() {
-        int empleadoSelectedRow = empleadosTable.getSelectedRow();
+    private void eliminarAsignacion() {
+        if (empleadoSeleccionado == null) {
+            mostrarAdvertencia("Seleccione un empleado primero");
+            return;
+        }
 
-        if (empleadoSelectedRow >= 0) {
-            try {
-                int idEmpleado = (int) empleadosTable.getModel().getValueAt(empleadoSelectedRow, 0);
-                List<AsignacionBonos> asignaciones = asignacionBonoDAO.getByEmpleadoId(idEmpleado);
+        int selectedRow = tableBonosAsignados.getSelectedRow();
+        if (selectedRow == -1) {
+            mostrarAdvertencia("Seleccione un bono asignado para eliminar");
+            return;
+        }
 
-                if (!asignaciones.isEmpty()) {
-                    // Crear lista de nombres de bonos para el diálogo de selección
-                    String[] opcionesBonos = new String[asignaciones.size()];
-                    for (int i = 0; i < asignaciones.size(); i++) {
-                        Bonos bono = bonoDAO.getById(asignaciones.get(i).getBonoId());
-                        opcionesBonos[i] = bono.getNombreBono() + " ($" + bono.getValor() + ")";
-                    }
+        int asignacionId = (int) tableBonosAsignados.getValueAt(selectedRow, 0);
 
-                    String bonoSeleccionado = (String) JOptionPane.showInputDialog(
-                            this,
-                            "Seleccione el bono a desasignar:",
-                            "Desasignar Bono",
-                            JOptionPane.QUESTION_MESSAGE,
-                            null,
-                            opcionesBonos,
-                            opcionesBonos[0]);
+        try {
+            AsignacionBonos asignacion = new AsignacionBonos();
+            asignacion.setId(asignacionId);
+            asignacion.setEstado((byte) 0);
 
-                    if (bonoSeleccionado != null) {
-                        int index = -1;
-                        for (int i = 0; i < opcionesBonos.length; i++) {
-                            if (opcionesBonos[i].equals(bonoSeleccionado)) {
-                                index = i;
-                                break;
-                            }
-                        }
-
-                        if (index >= 0) {
-                            AsignacionBonos asignacion = asignaciones.get(index);
-                            asignacion.setEstado((byte)0); // Desactivar la asignación
-
-                            boolean actualizado = asignacionBonoDAO.update(asignacion);
-                            if (actualizado) {
-                                JOptionPane.showMessageDialog(this,
-                                        "Bono desasignado exitosamente",
-                                        "Éxito",
-                                        JOptionPane.INFORMATION_MESSAGE);
-                                //loadEmpleados();
-                            }
-                        }
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(this,
-                            "El empleado no tiene bonos asignados",
-                            "Información",
-                            JOptionPane.INFORMATION_MESSAGE);
-                }
-            } catch (SQLException ex) {
-                showError("Error al desasignar bono: " + ex.getMessage());
+            if (asignacionBonosDAO.update(asignacion)) {
+                cargarBonosAsignados();
+                mostrarMensaje("Asignación eliminada correctamente");
+            } else {
+                mostrarError("No se pudo eliminar la asignación");
             }
-        } else {
-            JOptionPane.showMessageDialog(this,
-                    "Seleccione un empleado para desasignar bonos",
-                    "Advertencia",
-                    JOptionPane.WARNING_MESSAGE);
+        } catch (SQLException ex) {
+            mostrarError("Error al eliminar asignación: " + ex.getMessage());
         }
     }
 
-    private void showError(String message) {
-        JOptionPane.showMessageDialog(this,
-                message,
-                "Error",
-                JOptionPane.ERROR_MESSAGE);
+    private void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void mostrarAdvertencia(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Advertencia", JOptionPane.WARNING_MESSAGE);
+    }
+
+    private void mostrarMensaje(String mensaje) {
+        JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new AsignacionBonosForm().setVisible(true));
+        SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Asignación de Bonos");
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setSize(900, 600);
+            frame.setLocationRelativeTo(null);
+            frame.add(new AsignacionBonosForm());
+            frame.setVisible(true);
+        });
     }
-
-
 }

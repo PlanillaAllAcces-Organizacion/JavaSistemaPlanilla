@@ -6,6 +6,7 @@ import java.sql.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 public class EmpleadoDAO {
     private ConnectionManager conn;
@@ -246,5 +247,40 @@ public class EmpleadoDAO {
         }
         return empleado;
     }
+    public List<Empleado> getAllActive() throws SQLException {
+        List<Empleado> empleados = new ArrayList<>();
+        Connection connection = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
 
+        try {
+            connection = conn.connect();
+            ps = connection.prepareStatement(
+                    "SELECT Id, TipoDeHorarioId, PuestoTrabajoId, DUI, Nombre, Apellido, Telefono, Correo, Estado, SalarioBase, FechaContraInicial " +
+                            "FROM Empleado WHERE Estado = 1"
+            );
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Empleado empleado = new Empleado();
+                empleado.setId(rs.getInt("Id"));
+                empleado.setTipoDeHorarioId(rs.getInt("TipoDeHorarioId"));
+                empleado.setPuestoTrabajoId(rs.getInt("PuestoTrabajoId"));
+                empleado.setDui(rs.getString("DUI"));
+                empleado.setNombre(rs.getString("Nombre"));
+                empleado.setApellido(rs.getString("Apellido"));
+                empleado.setTelefono(rs.getInt("Telefono"));
+                empleado.setCorreo(rs.getString("Correo"));
+                empleado.setEstado(rs.getByte("Estado"));
+                empleado.setSalario(rs.getDouble("SalarioBase"));
+                empleado.setFechacontra(rs.getObject("FechaContraInicial", LocalDateTime.class));
+                empleados.add(empleado);
+            }
+        } finally {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            conn.disconnect();
+        }
+        return empleados;
+    }
 }
