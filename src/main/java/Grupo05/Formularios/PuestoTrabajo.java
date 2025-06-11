@@ -23,6 +23,8 @@ public class PuestoTrabajo extends JDialog {
     private PuestoTrabajoDAO puestoTrabajoDAO;
     private Grupo05.dominio.PuestoTrabajo puestoActual;
 
+
+    //cambio de prueba
     public PuestoTrabajo(JFrame parent) {
         this(parent, null);
     }
