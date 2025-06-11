@@ -178,7 +178,7 @@ public class BonoDAO {
         ArrayList<Bonos> bonos = new ArrayList<>();
         try {
             ps = conn.connect().prepareStatement(
-                    "SELECT Id, NombreBono, Valor, Estado, Operacion FROM Bono"
+                    "SELECT Id, NombreBono, Valor, Estado, Operacion FROM Bono WHERE Estado=1"
             );
 
             rs = ps.executeQuery();
