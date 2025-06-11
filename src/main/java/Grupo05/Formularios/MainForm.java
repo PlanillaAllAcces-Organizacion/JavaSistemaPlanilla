@@ -44,8 +44,6 @@ public class MainForm extends JFrame {
             empleadoReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
         });
 
-
-
         // Nuevo ítem para Bonos
         JMenuItem itemBonos = new JMenuItem("Bonos"); // Crea un nuevo elemento de menú llamado "Bonos".
         menuMantenimiento.add(itemBonos); // Agrega el elemento "Bonos" al menú "Mantenimientos".
@@ -54,12 +52,18 @@ public class MainForm extends JFrame {
             bonoListForm.setVisible(true); // Hace visible el formulario de gestión de bonos
         });
 
-
         JMenuItem ítemDescuentos = new JMenuItem("Descuentos");
         menuMantenimiento.add(ítemDescuentos);
         ítemDescuentos.addActionListener(e -> {
-           DescuentoListForm descuentoListForm = new DescuentoListForm();
-           descuentoListForm.setVisible(true);
+            DescuentoListForm descuentoListForm = new DescuentoListForm();
+            descuentoListForm.setVisible(true);
+        });
+
+        JMenuItem ítemPuesto = new JMenuItem("Puesto de trabajo");
+        menuMantenimiento.add(ítemPuesto);
+        ítemPuesto.addActionListener(e -> {
+            PuestosTrabajoListForm puestoTrabajoList = new PuestosTrabajoListForm();
+            puestoTrabajoList.setVisible(true);
         });
 
         JMenuItem ítemHorario = new JMenuItem("Horario");
