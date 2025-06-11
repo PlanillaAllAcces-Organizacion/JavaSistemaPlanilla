@@ -130,7 +130,7 @@ public class EmpleadoReadingForm extends JDialog {
                     empleado.getDui(),
                     empleado.getTelefono(),
                     empleado.getCorreo(),
-                    empleado.getEstado() // Asumiendo que Empleado tiene un getStrEstado() similar a PuestoTrabajo
+                    empleado.getStrEstatus()
             });
         }
 
