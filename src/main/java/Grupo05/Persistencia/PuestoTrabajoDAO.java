@@ -171,6 +171,27 @@ public class PuestoTrabajoDAO {
     }
 
     /**
+     * Obtiene el nombre de un puesto de trabajo por su ID.
+     * @param id El ID del puesto
+     * @return El nombre del puesto o "Sin asignar" si no existe
+     * @throws SQLException Si ocurre un error de base de datos
+     */
+    public String getNombrePuesto(int id) throws SQLException {
+        try {
+            ps = conn.connect().prepareStatement("SELECT NombrePuesto FROM PuestoTrabajo WHERE Id = ?");
+            ps.setInt(1, id);
+            rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getString("NombrePuesto");
+            }
+            return "Sin asignar";
+        } finally {
+            closeResources();
+        }
+    }
+
+    /**
      * Mapea un ResultSet a un objeto PuestoTrabajo.
      * @param rs El ResultSet con los datos
      * @return Un objeto PuestoTrabajo
@@ -196,9 +217,7 @@ public class PuestoTrabajoDAO {
             if (ps != null) ps.close();
             conn.disconnect();
         } catch (SQLException e) {
-            // Loggear el error si es necesario
+            System.err.println("Error al cerrar recursos: " + e.getMessage());
         }
-        rs = null;
-        ps = null;
     }
 }

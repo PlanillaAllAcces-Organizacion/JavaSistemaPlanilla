@@ -28,8 +28,6 @@ class BonoDAOTest {
                 "El estado del bono creado debe ser igual al original.");
         assertEquals(bono.getOperacion(), res.getOperacion(),
                 "La operación del bono creado debe ser igual al original.");
-        assertEquals(bono.getPlanilla(), res.getPlanilla(),
-                "El planilla del bono creado debe ser igual al original.");
 
         return res;
     }
@@ -40,7 +38,6 @@ class BonoDAOTest {
         bono.setValor(bono.getValor() + 50.0);
         bono.setEstado((byte)(bono.getEstado() == 1 ? 0 : 1));
         bono.setOperacion((byte)(bono.getOperacion() == 1 ? 0 : 1));
-        bono.setPlanilla((byte)(bono.getPlanilla() == 1 ? 0 : 1));
 
         boolean res = bonoDAO.update(bono);
         assertTrue(res, "La actualización del bono debería ser exitosa.");
@@ -62,8 +59,7 @@ class BonoDAOTest {
                 "El estado del bono obtenido debe ser igual al esperado.");
         assertEquals(bono.getOperacion(), res.getOperacion(),
                 "La operación del bono obtenido debe ser igual al esperado.");
-        assertEquals(bono.getPlanilla(), res.getPlanilla(),
-                "El planilla del bono obtenido debe ser igual al esperado.");
+
     }
 
     private void search(Bonos bono) throws SQLException {
@@ -99,8 +95,8 @@ class BonoDAOTest {
                 nombreBono,
                 100.0,
                 (byte)1,
-                (byte)1,
                 (byte)1
+
         );
 
         // Prueba de creación
@@ -123,8 +119,7 @@ class BonoDAOTest {
                 "Bono de Productividad",
                 150.0,
                 (byte)1,
-                (byte)0,
-                (byte)1
+                (byte)0
         );
 
         Bonos res = bonoDAO.create(bono);

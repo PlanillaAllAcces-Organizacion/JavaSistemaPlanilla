@@ -98,7 +98,7 @@ public class DescuentoListForm extends JFrame {
 
     private void updateTableModel(ArrayList<Descuentos> descuentos) {
         DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"ID", "Nombre", "Valor", "Estado", "Operación", "Aplica a Planilla"},
+                new Object[]{"ID", "Nombre", "Valor", "Estado", "Operación"},
                 0
         ) {
             @Override
@@ -113,8 +113,7 @@ public class DescuentoListForm extends JFrame {
                     descuento.getNombre(),
                     String.format("%,.2f", descuento.getValor()),
                     descuento.getEstado() == 1 ? "Activo" : "Inactivo",
-                    descuento.getOperacion() == 1 ? "Fija" : "No fija",
-                    descuento.getPlanilla() == 1 ? "Mensual" : "Quincenal"
+                    descuento.getOperacion() == 1 ? "Fija" : "No fija"
             });
         }
 

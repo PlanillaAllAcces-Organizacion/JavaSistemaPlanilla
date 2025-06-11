@@ -6,18 +6,16 @@ public class Descuentos {
     private double valor;
     private byte estado;
     private byte operacion;
-    private byte planilla;
 
     public Descuentos() {
     }
 
-    public Descuentos(int id, String nombre, double valor, byte estado, byte operacion, byte planilla) {
+    public Descuentos(int id, String nombre, double valor, byte estado, byte operacion) {
         this.id = id;
         this.nombre = nombre;
         this.valor = valor;
         this.estado = estado;
         this.operacion = operacion;
-        this.planilla = planilla;
     }
 
     // Getters y Setters
@@ -61,13 +59,7 @@ public class Descuentos {
         this.operacion = operacion;
     }
 
-    public byte getPlanilla() {
-        return planilla;
-    }
 
-    public void setPlanilla(byte planilla) {
-        this.planilla = planilla;
-    }
 
     // Método toString para representación del objeto
     @Override
@@ -78,7 +70,6 @@ public class Descuentos {
                 ", valor=" + valor +
                 ", estado=" + estado +
                 ", operacion=" + operacion +
-                ", planilla=" + planilla +
                 '}';
     }
 }
