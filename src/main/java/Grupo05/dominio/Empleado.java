@@ -2,28 +2,29 @@ package Grupo05.dominio;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 public class Empleado {
 
-    int id;
-    Integer tipoDeHorarioId;
-    Integer puestoTrabajoId;
-    String dui;
-    String nombre;
-    String apellido;
-    int telefono;
-    String correo;
-    byte estado;
-    double salario;
-    LocalDateTime fechacontra;
+    private int id;
+    private Integer tipoDeHorarioId;
+    private Integer puestoTrabajoId;
+    private String dui;
+    private String nombre;
+    private String apellido;
+    private int telefono;
+    private String correo;
+    private byte estado;
+    private double salario;
+    private LocalDateTime fechacontra;
 
 
     public Empleado(){
-
+        this.fechacontra = LocalDateTime.now();
     }
 
     public Empleado(int id, Integer tipoDeHorarioId, Integer puestoTrabajoId, String dui, String nombre, String apellido, int telefono, String corre,
-                    byte estado, double salario, LocalDateTime fechacontra, String usuario, String passwordHash){
+                    byte estado, double salario, String fechaContraStr){
         this.id = id;
         this.tipoDeHorarioId = tipoDeHorarioId;
         this.puestoTrabajoId = puestoTrabajoId;
@@ -34,7 +35,10 @@ public class Empleado {
         this.correo = corre;
         this.estado = estado;
         this.salario = salario;
-        this.fechacontra = fechacontra;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        this.fechacontra = LocalDateTime.parse(fechaContraStr, formatter);
+
+
 
     }
 

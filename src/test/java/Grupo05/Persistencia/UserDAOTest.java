@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter; // Importar para formatear LocalDateTime
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -13,7 +13,7 @@ import Grupo05.dominio.User;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class UserDAOtest {
+public class UserDAOTest {
 
     private UserDAO userDAO;
 
