@@ -111,6 +111,17 @@ public class AsignacionDescuentosDAO {
         return existe;
     }
 
+    public boolean delete(int asignacionId) throws SQLException {
+        try {
+            ps= conn.connect().prepareStatement(
+                    "DELETE FROM AsignacionDescuento WHERE Id = ?"
+            );
+            ps.setInt(1, asignacionId);
+            return ps.executeUpdate() > 0;
+        }finally {
+            closeResources();
+        }
+    }
     private void closeResources() {
         try {
             if (rs != null) rs.close();

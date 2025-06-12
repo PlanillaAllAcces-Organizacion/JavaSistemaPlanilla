@@ -35,6 +35,7 @@ class PuestoTrabajoDAOTest {
         return res;
     }
 
+
     private void update(PuestoTrabajo puesto) throws SQLException {
         // Modificamos los valores del puesto
         puesto.setNombrePuesto(puesto.getNombrePuesto() + "_mod");

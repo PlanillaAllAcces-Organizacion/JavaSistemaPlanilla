@@ -116,3 +116,8 @@ GO
 ALTER TABLE Bono
 DROP COLUMN Planilla;
 GO
+
+-- Eliminar la columna Estado de la tabla AsignacionBono
+ALTER TABLE AsignacionBono
+DROP COLUMN Estado;
+GO

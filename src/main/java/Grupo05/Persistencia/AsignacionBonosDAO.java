@@ -17,12 +17,11 @@ public class AsignacionBonosDAO {
     public AsignacionBonos create(AsignacionBonos asignacion) throws SQLException {
         try {
             ps = conn.connect().prepareStatement(
-                    "INSERT INTO AsignacionBono (EmpleadosId, BonosId, Estado) VALUES (?, ?, ?)",
+                    "INSERT INTO AsignacionBono (EmpleadosId, BonosId) VALUES (?, ?)",
                     PreparedStatement.RETURN_GENERATED_KEYS
             );
             ps.setInt(1, asignacion.getEmpleadoId());
             ps.setInt(2, asignacion.getBonoId());
-            ps.setByte(3, asignacion.getEstado());
 
             if (ps.executeUpdate() > 0) {
                 rs = ps.getGeneratedKeys();
@@ -46,7 +45,7 @@ public class AsignacionBonosDAO {
         try {
             connection = conn.connect();
             ps = connection.prepareStatement(
-                    "SELECT Id, EmpleadosId, BonosId, Estado FROM AsignacionBono WHERE EmpleadosId = ? AND Estado = 1"
+                    "SELECT Id, EmpleadosId, BonosId FROM AsignacionBono WHERE EmpleadosId = ?"
             );
             ps.setInt(1, empleadoId);
             rs = ps.executeQuery();
@@ -56,7 +55,6 @@ public class AsignacionBonosDAO {
                 asignacion.setId(rs.getInt("Id"));
                 asignacion.setEmpleadoId(rs.getInt("EmpleadosId"));
                 asignacion.setBonoId(rs.getInt("BonosId"));
-                asignacion.setEstado(rs.getByte("Estado"));
                 asignaciones.add(asignacion);
             }
         } finally {
@@ -67,26 +65,16 @@ public class AsignacionBonosDAO {
 
         return asignaciones;
     }
-    public boolean update(AsignacionBonos asignacion) throws SQLException {
+
+    public boolean delete(int asignacionId) throws SQLException {
         try {
             ps = conn.connect().prepareStatement(
-                    "UPDATE AsignacionBono SET Estado = ? WHERE Id = ?"
+                    "DELETE FROM AsignacionBono WHERE Id = ?"
             );
-            ps.setByte(1, asignacion.getEstado());
-            ps.setInt(2, asignacion.getId());
+            ps.setInt(1, asignacionId);
             return ps.executeUpdate() > 0;
         } finally {
             closeResources();
-        }
-    }
-
-    private void closeResources() {
-        try {
-            if (rs != null) rs.close();
-            if (ps != null) ps.close();
-            conn.disconnect();
-        } catch (SQLException e) {
-            System.err.println("Error al cerrar recursos: " + e.getMessage());
         }
     }
 
@@ -99,7 +87,7 @@ public class AsignacionBonosDAO {
         try {
             connection = conn.connect();
             ps = connection.prepareStatement(
-                    "SELECT COUNT(*) FROM AsignacionBono WHERE EmpleadosId = ? AND BonosId = ? AND Estado = 1"
+                    "SELECT COUNT(*) FROM AsignacionBono WHERE EmpleadosId = ? AND BonosId = ?"
             );
             ps.setInt(1, empleadoId);
             ps.setInt(2, bonoId);
@@ -114,5 +102,15 @@ public class AsignacionBonosDAO {
             conn.disconnect();
         }
         return existe;
+    }
+
+    private void closeResources() {
+        try {
+            if (rs != null) rs.close();
+            if (ps != null) ps.close();
+            conn.disconnect();
+        } catch (SQLException e) {
+            System.err.println("Error al cerrar recursos: " + e.getMessage());
+        }
     }
 }

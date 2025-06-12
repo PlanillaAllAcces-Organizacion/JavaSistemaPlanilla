@@ -190,6 +190,7 @@ public class AsignacionDescuentoForm extends JPanel{
                 }
             };
 
+            model.addColumn("ID Asignación");
             model.addColumn("Nombre Descuento");
             model.addColumn("Valor");
 
@@ -197,7 +198,8 @@ public class AsignacionDescuentoForm extends JPanel{
                 Descuentos descuento = descuentoDAO.getById(asignacion.getDescuentos());
                 if (descuento != null) {
                     model.addRow(new Object[]{
-                            descuento.getNombre(),  // Solo mostramos el nombre
+                            asignacion.getId(),
+                            descuento.getNombre(),
                             descuento.getValor()
                     });
                 }
@@ -229,10 +231,10 @@ public class AsignacionDescuentoForm extends JPanel{
 
             AsignacionDescuento asignacion = new AsignacionDescuento();
             asignacion.setEmpleadoId(empleadoSeleccionado.getId());
-            asignacion.setId(descuentoSelecionado.getId());
+            asignacion.setDescuentos(descuentoSelecionado.getId()); // Corregido: usar setDescuentos()
 
             if (asignacionDescuentoDAO.create(asignacion) != null) {
-                cargarDescuentosDisponibles();
+                cargarDescuentosAsignados();
                 mostrarMensaje("Descuento asignado correctamente");
             } else {
                 mostrarError("No se pudo asignar el descuento");
@@ -254,13 +256,13 @@ public class AsignacionDescuentoForm extends JPanel{
             return;
         }
 
-        int asignacionId = (int) tableEmpleados.getValueAt(selectedRow, 0);
+        int asignacionId = (int) tableDescuentosAsignados.getValueAt(selectedRow, 0);
 
         try {
             AsignacionDescuento asignacion = new AsignacionDescuento();
             asignacion.setId(asignacionId);
 
-            if (asignacionDescuentoDAO.update(asignacion)) {
+            if (asignacionDescuentoDAO.delete(asignacionId)) {
                 cargarDescuentosAsignados();
                 mostrarMensaje("Asignación eliminada correctamente");
             } else {

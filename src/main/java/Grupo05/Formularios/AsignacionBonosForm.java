@@ -188,17 +188,17 @@ public class AsignacionBonosForm extends JPanel {
                 }
             };
 
+            model.addColumn("ID Asignación");
             model.addColumn("Nombre Bono");
             model.addColumn("Valor");
-            model.addColumn("Estado");
 
             for (AsignacionBonos asignacion : asignaciones) {
                 Bonos bono = bonoDAO.getById(asignacion.getBonoId());
                 if (bono != null) {
                     model.addRow(new Object[]{
-                            bono.getNombreBono(),  // Solo mostramos el nombre
-                            bono.getValor(),
-                            asignacion.getEstado() == 1 ? "Activo" : "Inactivo"
+                            asignacion.getId(),
+                            bono.getNombreBono(),
+                            bono.getValor()
                     });
                 }
             }
@@ -230,7 +230,6 @@ public class AsignacionBonosForm extends JPanel {
             AsignacionBonos asignacion = new AsignacionBonos();
             asignacion.setEmpleadoId(empleadoSeleccionado.getId());
             asignacion.setBonoId(bonoSeleccionado.getId());
-            asignacion.setEstado((byte) 1);
 
             if (asignacionBonosDAO.create(asignacion) != null) {
                 cargarBonosAsignados();
@@ -258,11 +257,7 @@ public class AsignacionBonosForm extends JPanel {
         int asignacionId = (int) tableBonosAsignados.getValueAt(selectedRow, 0);
 
         try {
-            AsignacionBonos asignacion = new AsignacionBonos();
-            asignacion.setId(asignacionId);
-            asignacion.setEstado((byte) 0);
-
-            if (asignacionBonosDAO.update(asignacion)) {
+            if (asignacionBonosDAO.delete(asignacionId)) {
                 cargarBonosAsignados();
                 mostrarMensaje("Asignación eliminada correctamente");
             } else {

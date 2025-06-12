@@ -4,18 +4,16 @@ public class AsignacionBonos {
     private int id;
     private int empleadoId;
     private int bonoId;
-    private byte estado;
 
     // Constructor vacío
     public AsignacionBonos() {
     }
 
     // Constructor con parámetros
-    public AsignacionBonos(int id, int empleadoId, int bonoId, byte estado) {
+    public AsignacionBonos(int id, int empleadoId, int bonoId) {
         this.id = id;
         this.empleadoId = empleadoId;
         this.bonoId = bonoId;
-        this.estado = estado;
     }
 
     // Getters y Setters
@@ -43,26 +41,12 @@ public class AsignacionBonos {
         this.bonoId = bonoId;
     }
 
-    public byte getEstado() {
-        return estado;
-    }
-
-    public void setEstado(byte estado) {
-        this.estado = estado;
-    }
-
-    // Método para verificar si la asignación está activa
-    public boolean isActivo() {
-        return estado == 1;
-    }
-
     @Override
     public String toString() {
         return "AsignacionBono{" +
                 "id=" + id +
                 ", empleadoId=" + empleadoId +
                 ", bonoId=" + bonoId +
-                ", estado=" + estado +
                 '}';
     }
 }
