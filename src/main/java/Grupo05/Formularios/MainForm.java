@@ -1,8 +1,19 @@
 package Grupo05.Formularios;
 
 import javax.swing.*;
+import Grupo05.dominio.User;
 
 public class MainForm extends JFrame {
+
+    private User userAutenticate;
+
+    public User getUserAutenticate() {
+        return userAutenticate;
+    }
+
+    public void setUserAutenticate(User userAutenticate) {
+        this.userAutenticate = userAutenticate;
+    }
 
     public MainForm(){
         setTitle("Sistema en java de escritorio"); // Establece el título de la ventana principal (JFrame).
@@ -20,6 +31,13 @@ public class MainForm extends JFrame {
         JMenu menuPerfil = new JMenu("Perfil"); // Crea un nuevo menú llamado "Perfil".
         menuBar.add(menuPerfil); // Agrega el menú "Perfil" a la barra de menú.
 
+        JMenuItem itemChangePassword = new JMenuItem("Cambiar contraseña"); // Crea un nuevo elemento de menú llamado "Cambiar contraseña".
+        menuPerfil.add(itemChangePassword); // Agrega el elemento "Cambiar contraseña" al menú "Perfil".
+        itemChangePassword.addActionListener(e -> { // Agrega un ActionListener al elemento "Cambiar contraseña".
+            PasswordForm changePassword = new PasswordForm(this); // Cuando se hace clic, crea una nueva instancia de ChangePasswordForm, pasándole la instancia actual de MainForm como padre.
+            changePassword.setVisible(true); // Hace visible la ventana de cambio de contraseña.
+
+        });
 
         JMenuItem itemSalir = new JMenuItem("Salir"); // Crea un nuevo elemento de menú llamado "Salir".
         menuPerfil.add(itemSalir); // Agrega el elemento "Salir" al menú "Perfil".
