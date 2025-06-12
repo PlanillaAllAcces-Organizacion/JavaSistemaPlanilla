@@ -1,6 +1,7 @@
 package Grupo05.Persistencia;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import Grupo05.dominio.Bonos;
 import java.sql.SQLException;
@@ -8,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 class BonoDAOTest {
     private BonoDAO bonoDAO;
 

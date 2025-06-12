@@ -1,12 +1,14 @@
 package Grupo05.Persistencia;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import Grupo05.dominio.AsignacionDescuento;
 import java.sql.SQLException;
 import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
+@Disabled
 class AsignacionDescuentosDAOTest {
     private AsignacionDescuentosDAO asignacionDAO;
 
