@@ -91,6 +91,20 @@ public class MainForm extends JFrame {
             descuentoListForm.setVisible(true);
         });
 
+        JMenuItem ítemAsingacionB = new JMenuItem("Asignar Bonos");
+        menuMantenimiento.add(ítemAsingacionB);
+        ítemAsingacionB.addActionListener(e -> {
+            AsignacionBonosForm asignacionBonosForm = new AsignacionBonosForm(this);
+            asignacionBonosForm.setVisible(true);
+        });
+
+        JMenuItem ítemAsingacionD = new JMenuItem("Asignar Descuentoss");
+        menuMantenimiento.add(ítemAsingacionD);
+        ítemAsingacionD.addActionListener(e -> {
+            AsignacionDescuentoForm asignacionDescuentoForm = new AsignacionDescuentoForm(this);
+            asignacionDescuentoForm.setVisible(true);
+        });
+
         JMenuItem ítemPago = new JMenuItem("Pago");
         menuMantenimiento.add(ítemPago);
         ítemPago.addActionListener(e -> {

@@ -15,7 +15,7 @@ public class ConnectionManager {
 
     /*private static final String  STR_CONNECTION = "jdbc:sqlserver://JC39012\\SQLEXPRESS; "+
             "encrypt=true; " +
-            "database=Paysheet2; " +
+            "database=Paysheet3; " +
             "trustServerCertificate=true;" +
             "user=java2025;" +
             "password=12345";*/

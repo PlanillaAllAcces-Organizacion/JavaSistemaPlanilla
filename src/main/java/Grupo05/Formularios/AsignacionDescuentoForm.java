@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 import Grupo05.dominio.Empleado;
 
-public class AsignacionDescuentoForm extends JPanel{
+public class AsignacionDescuentoForm extends JDialog{
 
     private JTable tableDescuentosAsignados;
     private JTable tableEmpleados;
@@ -28,9 +28,14 @@ public class AsignacionDescuentoForm extends JPanel{
     private PuestoTrabajoDAO puestoTrabajoDAO;
     private Empleado empleadoSeleccionado;
 
-    public AsignacionDescuentoForm(){
+    public AsignacionDescuentoForm(JFrame parent){
+        super(parent, "Asignación de Descuentos", true);
 
-        // Inicializar DAOs
+        setSize(900, 600);
+        setLocationRelativeTo(parent);
+
+        // Configurar el layout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         empleadoDAO = new EmpleadoDAO();
         descuentoDAO = new DescuentoDAO();
         asignacionDescuentoDAO = new AsignacionDescuentosDAO();
@@ -285,14 +290,4 @@ public class AsignacionDescuentoForm extends JPanel{
         JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Asignación de Descuentos");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(900, 600);
-            frame.setLocationRelativeTo(null);
-            frame.add(new AsignacionDescuentoForm());
-            frame.setVisible(true);
-        });
-    }
 }

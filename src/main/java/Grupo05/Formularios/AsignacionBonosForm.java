@@ -14,7 +14,7 @@ import java.awt.*;
 import java.sql.SQLException;
 import java.util.List;
 
-public class AsignacionBonosForm extends JPanel {
+public class AsignacionBonosForm extends JDialog {
     private JTable tableEmpleados;
     private JTable tableBonosAsignados;
     private JComboBox<Bonos> comboBoxBonos;
@@ -27,15 +27,25 @@ public class AsignacionBonosForm extends JPanel {
     private PuestoTrabajoDAO puestoTrabajoDAO;
     private Empleado empleadoSeleccionado;
 
-    public AsignacionBonosForm() {
+    public AsignacionBonosForm(JFrame parent) {
+        super(parent, "Asignación de Bonos", true);
+
+        setSize(900, 600);
+        setLocationRelativeTo(parent);
+
+
+        // Configurar el layout
+        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
         // Inicializar DAOs
         empleadoDAO = new EmpleadoDAO();
         bonoDAO = new BonoDAO();
         asignacionBonosDAO = new AsignacionBonosDAO();
         puestoTrabajoDAO = new PuestoTrabajoDAO();
 
-        // Configurar el layout
-        setLayout(new BorderLayout(10, 10));
+
+        setContentPane(mainPanel);
+        cargarEmpleados();
+        cargarBonosDisponibles();
 
         // Panel superior con título
         JPanel panelTitulo = new JPanel();
@@ -280,14 +290,5 @@ public class AsignacionBonosForm extends JPanel {
         JOptionPane.showMessageDialog(this, mensaje, "Información", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("Asignación de Bonos");
-            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            frame.setSize(900, 600);
-            frame.setLocationRelativeTo(null);
-            frame.add(new AsignacionBonosForm());
-            frame.setVisible(true);
-        });
-    }
+
 }

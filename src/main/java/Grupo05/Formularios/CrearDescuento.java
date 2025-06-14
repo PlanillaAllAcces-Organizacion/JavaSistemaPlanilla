@@ -21,9 +21,6 @@ public class CrearDescuento extends JFrame {
     private CUD operacion;
     private Descuentos descuentoExistente;
 
-    public CrearDescuento() {
-        this(CUD.CREATE, null);
-    }
 
     public CrearDescuento(CUD operacion) {
         this(operacion, null);
@@ -127,10 +124,6 @@ public class CrearDescuento extends JFrame {
         cbOperacion.addItem(new CBOption("No fija", (byte)0));
         panel.add(cbOperacion, gbc);
 
-        // Planilla
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        panel.add(new JLabel("Planilla:"), gbc);
 
         // Botones
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -239,10 +232,4 @@ public class CrearDescuento extends JFrame {
         }
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // Ejemplo de uso
-            new CrearDescuento(CUD.CREATE).setVisible(true);
-        });
-    }
 }
