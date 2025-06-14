@@ -1,19 +1,23 @@
 package Grupo05.dominio;
 
-import java.util.Date;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class PagoEmpleado {
     private int id;
     private int empleadoId;
-    private Date fechaPago;
+    private LocalDateTime fechaPago;
     private int horasTrabajadas;
     private double valorHora;
     private double totalPago;
 
+    private BigDecimal totalBonosAplicados;
+    private BigDecimal totalDescuentosAplicados;
+
     public PagoEmpleado() {
     }
 
-    public PagoEmpleado(int id, int empleadoId, Date fechaPago, int horasTrabajadas, double valorHora, double totalPago) {
+    public PagoEmpleado(int id, int empleadoId, LocalDateTime fechaPago, int horasTrabajadas, double valorHora, double totalPago) {
         this.id = id;
         this.empleadoId = empleadoId;
         this.fechaPago = fechaPago;
@@ -22,7 +26,7 @@ public class PagoEmpleado {
         this.totalPago = totalPago;
     }
 
-    // Getters y Setters
+
     public int getId() {
         return id;
     }
@@ -39,11 +43,11 @@ public class PagoEmpleado {
         this.empleadoId = empleadoId;
     }
 
-    public Date getFechaPago() {
+    public LocalDateTime getFechaPago() {
         return fechaPago;
     }
 
-    public void setFechaPago(Date fechaPago) {
+    public void setFechaPago(LocalDateTime fechaPago) {
         this.fechaPago = fechaPago;
     }
 
@@ -69,6 +73,22 @@ public class PagoEmpleado {
 
     public void setTotalPago(double totalPago) {
         this.totalPago = totalPago;
+    }
+
+    public BigDecimal getTotalBonosAplicados() {
+        return totalBonosAplicados;
+    }
+
+    public void setTotalBonosAplicados(BigDecimal totalBonosAplicados) {
+        this.totalBonosAplicados = totalBonosAplicados;
+    }
+
+    public BigDecimal getTotalDescuentosAplicados() {
+        return totalDescuentosAplicados;
+    }
+
+    public void setTotalDescuentosAplicados(BigDecimal totalDescuentosAplicados) {
+        this.totalDescuentosAplicados = totalDescuentosAplicados;
     }
 
     @Override

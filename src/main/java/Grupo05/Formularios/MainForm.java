@@ -91,6 +91,17 @@ public class MainForm extends JFrame {
             descuentoListForm.setVisible(true);
         });
 
+        JMenuItem ítemPago = new JMenuItem("Pago");
+        menuMantenimiento.add(ítemPago);
+        ítemPago.addActionListener(e -> {
+            JFrame dummyParentFrame = new JFrame();
+            PagoEmpleadoReadingForm PagoEmpleadoReading = new PagoEmpleadoReadingForm(dummyParentFrame);
+            dummyParentFrame.setSize(600, 400);
+            dummyParentFrame.setLocationRelativeTo(null);
+            dummyParentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            PagoEmpleadoReading.setVisible(true);
+        });
+
 
     }
 }

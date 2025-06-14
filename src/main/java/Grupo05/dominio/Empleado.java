@@ -144,4 +144,9 @@ public class Empleado {
         }
         return str;
     }
+
+    @Override
+    public String toString() {
+        return nombre + " " + apellido;
+    }
 }
