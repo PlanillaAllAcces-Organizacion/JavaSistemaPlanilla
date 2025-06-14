@@ -1,3 +1,4 @@
+
 -- Crear base de datos
 CREATE DATABASE Paysheet2;
 GO
@@ -98,11 +99,15 @@ GO
 CREATE TABLE PagoEmpleado (
     Id INT IDENTITY(1,1) PRIMARY KEY,
     EmpleadoId INT NOT NULL,
-    FechaPago DATE NOT NULL,
+	BonoId INT NOT NULL,
+	DescuentoId INT NOT NULL,
+    FechaPago DATETIME NOT NULL,
     HorasTrabajadas INT NOT NULL,
     ValorHora DECIMAL(8,2) NOT NULL,
     TotalPago INT NOT NULL,
-    CONSTRAINT FK_PagoEmpleado_Empleado FOREIGN KEY (EmpleadoId) REFERENCES Empleado(Id)
+    CONSTRAINT FK_PagoEmpleado_Empleado FOREIGN KEY (EmpleadoId) REFERENCES Empleado(Id),
+	CONSTRAINT FK_PagoEmpleado_Bono FOREIGN KEY (BonoId) REFERENCES Bono(Id),
+	CONSTRAINT FK_PagoEmpleado_Descuento FOREIGN KEY (DescuentoId) REFERENCES Descuento(Id)
 );
 
 GO
@@ -121,3 +126,27 @@ GO
 ALTER TABLE AsignacionBono
 DROP COLUMN Estado;
 GO
+
+
+ALTER TABLE PagoEmpleado
+DROP CONSTRAINT FK_PagoEmpleado_Bono; -- Primero, elimina la clave foránea existente
+ALTER TABLE PagoEmpleado
+DROP COLUMN BonoId;
+
+ALTER TABLE PagoEmpleado
+DROP CONSTRAINT FK_PagoEmpleado_Descuento; -- Primero, elimina la clave foránea existente
+ALTER TABLE PagoEmpleado
+DROP COLUMN DescuentoId;
+
+ALTER TABLE PagoEmpleado
+ADD TotalBonosAplicados DECIMAL(10,2) NOT NULL DEFAULT 0; -- Añade la nueva columna para el total de bonos
+ALTER TABLE PagoEmpleado
+ADD TotalDescuentosAplicados DECIMAL(10,2) NOT NULL DEFAULT 0; -- Añade la nueva columna para el total de descuentos
+
+
+select * from PagoEmpleado
+select * from PuestoTrabajo
+
+
+ALTER TABLE PagoEmpleado
+AlTER COLUMN TotalPago DECIMAL(10,2);
