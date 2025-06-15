@@ -25,6 +25,7 @@ public class EmpleadoReadingForm extends JDialog {
 
     // Constructor de la clase UserReadingForm. Recibe una instancia de MainForm como parámetro.
     public EmpleadoReadingForm(MainForm mainForm) {
+        super(mainForm, true);
         this.mainForm = mainForm;
         empleadoDAO = new EmpleadoDAO();
         setContentPane(mainPanel);
@@ -32,6 +33,7 @@ public class EmpleadoReadingForm extends JDialog {
         setTitle("Buscar Empleados"); // Título actualizado
         pack();
         setLocationRelativeTo(mainForm);
+        setContentPane(mainPanel);
 
         // Listener para el campo de búsqueda por nombre/DUI
         txtName.addKeyListener(new KeyAdapter() {
