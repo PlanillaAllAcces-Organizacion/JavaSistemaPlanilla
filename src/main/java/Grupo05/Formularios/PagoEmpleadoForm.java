@@ -3,10 +3,9 @@ package Grupo05.Formularios;
 import Grupo05.Persistencia.PagoEmpleadoDAO;
 import Grupo05.Persistencia.EmpleadoDAO;
 import Grupo05.Persistencia.PuestoTrabajoDAO;
-import Grupo05.dominio.Empleado;
-import Grupo05.dominio.PagoEmpleado;
-import Grupo05.dominio.PuestoTrabajo;
+import Grupo05.dominio.*;
 import Grupo05.Utils.CUD;
+import Grupo05.dominio.PuestoTrabajo;
 
 import javax.swing.*;
 import java.awt.*;
@@ -287,43 +286,83 @@ public class PagoEmpleadoForm extends JDialog {
 
     private void calcularPago() {
         if (empleadoSeleccionado == null || empleadoSeleccionado.getId() == 0 || puestoEmpleadoSeleccionado == null) {
-            JOptionPane.showMessageDialog(this, "Por favor, seleccione un empleado válido y asegúrese de que su puesto de trabajo está cargado.", "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Por favor, seleccione un empleado válido",
+                    "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         if (txtHorasTrabajadas.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Ingrese las horas trabajadas.", "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Ingrese las horas trabajadas.",
+                    "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
         try {
             int horasTrabajadas = Integer.parseInt(txtHorasTrabajadas.getText());
             if (horasTrabajadas < 0) {
-                JOptionPane.showMessageDialog(this, "Las horas trabajadas no pueden ser negativas.", "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(this,
+                        "Las horas trabajadas no pueden ser negativas.",
+                        "Error de Cálculo", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            BigDecimal valorHoraPuesto = puestoEmpleadoSeleccionado.getValorxHora();
-            BigDecimal salarioBasePuesto = puestoEmpleadoSeleccionado.getSalarioBase();
+            // Obtener valores base del puesto (ya son BigDecimal)
+            BigDecimal valorHora = puestoEmpleadoSeleccionado.getValorxHora();
+            BigDecimal salarioBase = puestoEmpleadoSeleccionado.getSalarioBase();
 
-            // ¡Estos métodos se mantienen en PagoEmpleadoDAO por ahora!
-            double totalBonos = pagoEmpleadoDAO.calcularBonosParaEmpleado(empleadoSeleccionado.getId());
-            double totalDescuentos = pagoEmpleadoDAO.calcularDescuentosParaEmpleado(empleadoSeleccionado.getId());
+            // Calcular pago bruto (horas * valor hora)
+            BigDecimal pagoBruto = valorHora.multiply(new BigDecimal(horasTrabajadas));
 
-            BigDecimal pagoBruto = valorHoraPuesto.multiply(BigDecimal.valueOf(horasTrabajadas));
-            BigDecimal pagoNeto = pagoBruto
-                    .add(salarioBasePuesto)
-                    .add(BigDecimal.valueOf(totalBonos))
-                    .subtract(BigDecimal.valueOf(totalDescuentos));
+            // 1. Calcular bonos fijos
+            BigDecimal totalBonosFijos = pagoEmpleadoDAO.calcularBonosFijosParaEmpleado(empleadoSeleccionado.getId());
 
-            txtBonos.setText(String.format("%.2f", totalBonos).replace(',', '.'));
-            txtDescuentos.setText(String.format("%.2f", totalDescuentos).replace(',', '.'));
-            txtPagoTotal.setText(pagoNeto.toPlainString());
+            // 2. Calcular descuentos fijos
+            BigDecimal totalDescuentosFijos = pagoEmpleadoDAO.calcularDescuentosFijosParaEmpleado(empleadoSeleccionado.getId());
+
+            // 3. Calcular bonos no fijos (porcentajes)
+            BigDecimal totalBonosNoFijos = BigDecimal.ZERO;
+            List<Bonos> bonosNoFijos = pagoEmpleadoDAO.obtenerBonosNoFijos(empleadoSeleccionado.getId());
+            for (Bonos bono : bonosNoFijos) {
+                BigDecimal porcentaje = new BigDecimal(bono.getValor()).divide(new BigDecimal(100));
+                totalBonosNoFijos = totalBonosNoFijos.add(pagoBruto.multiply(porcentaje));
+            }
+
+            // 4. Calcular descuentos no fijos (porcentajes)
+            BigDecimal totalDescuentosNoFijos = BigDecimal.ZERO;
+            List<Descuentos> descuentosNoFijos = pagoEmpleadoDAO.obtenerDescuentosNoFijos(empleadoSeleccionado.getId());
+            for (Descuentos descuento : descuentosNoFijos) {
+                BigDecimal porcentaje = new BigDecimal(descuento.getValor()).divide(new BigDecimal(100));
+                totalDescuentosNoFijos = totalDescuentosNoFijos.add(pagoBruto.multiply(porcentaje));
+            }
+
+            // Calcular pago total
+            BigDecimal pagoTotal = pagoBruto
+                    .add(salarioBase)
+                    .add(totalBonosFijos)
+                    .add(totalBonosNoFijos)
+                    .subtract(totalDescuentosFijos)
+                    .subtract(totalDescuentosNoFijos);
+
+            // Mostrar resultados
+            txtBonos.setText(totalBonosFijos.add(totalBonosNoFijos).toString());
+            txtDescuentos.setText(totalDescuentosFijos.add(totalDescuentosNoFijos).toString());
+            txtPagoTotal.setText(pagoTotal.toString());
 
         } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Ingrese un número válido para las horas trabajadas.", "Error de Entrada", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Ingrese un número válido para las horas trabajadas.",
+                    "Error de Entrada", JOptionPane.ERROR_MESSAGE);
         } catch (SQLException ex) {
-            JOptionPane.showMessageDialog(this, "Error de base de datos al calcular bonos/descuentos: " + ex.getMessage(), "Error de DB", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this,
+                    "Error de base de datos al calcular bonos/descuentos: " + ex.getMessage(),
+                    "Error de DB", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Error inesperado: " + ex.getMessage(),
+                    "Error", JOptionPane.ERROR_MESSAGE);
             ex.printStackTrace();
         }
     }

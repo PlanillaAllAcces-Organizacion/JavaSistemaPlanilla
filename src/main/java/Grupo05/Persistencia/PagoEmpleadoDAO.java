@@ -1,5 +1,7 @@
 package Grupo05.Persistencia;
 
+import Grupo05.dominio.Bonos;
+import Grupo05.dominio.Descuentos;
 import Grupo05.dominio.PagoEmpleado;
 
 import java.math.BigDecimal;
@@ -296,6 +298,111 @@ public class PagoEmpleadoDAO {
             closeResources();
         }
         return pagos;
+    }
+    /**
+     * Obtiene los bonos no fijos (porcentuales) asignados a un empleado
+     */
+    public List<Bonos> obtenerBonosNoFijos(int empleadoId) throws SQLException {
+        List<Bonos> bonos = new ArrayList<>();
+        try {
+            ps = conn.connect().prepareStatement(
+                    "SELECT b.Id, b.NombreBono, b.Valor, b.Operacion " +
+                            "FROM AsignacionBono ab " +
+                            "JOIN Bono b ON ab.BonosId = b.Id " +
+                            "WHERE ab.EmpleadosId = ? AND b.Estado = 1 AND b.Operacion = 0"
+            );
+            ps.setInt(1, empleadoId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Bonos bono = new Bonos();
+                bono.setId(rs.getInt("Id"));
+                bono.setNombreBono(rs.getString("NombreBono"));
+                bono.setValor(rs.getDouble("Valor"));
+                bono.setOperacion(rs.getByte("Operacion"));
+                bonos.add(bono);
+            }
+        } finally {
+            closeResources();
+        }
+        return bonos;
+    }
+
+    /**
+     * Obtiene los descuentos no fijos (porcentuales) asignados a un empleado
+     */
+    public List<Descuentos> obtenerDescuentosNoFijos(int empleadoId) throws SQLException {
+        List<Descuentos> descuentos = new ArrayList<>();
+        try {
+            ps = conn.connect().prepareStatement(
+                    "SELECT d.Id, d.Nombre, d.Valor, d.Operacion " +
+                            "FROM AsignacionDescuento ad " +
+                            "JOIN Descuento d ON ad.DescuentosId = d.Id " +
+                            "WHERE ad.EmpleadosId = ? AND d.Estado = 1 AND d.Operacion = 0"
+            );
+            ps.setInt(1, empleadoId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Descuentos descuento = new Descuentos();
+                descuento.setId(rs.getInt("Id"));
+                descuento.setNombre(rs.getString("Nombre"));
+                descuento.setValor(rs.getDouble("Valor"));
+                descuento.setOperacion(rs.getByte("Operacion"));
+                descuentos.add(descuento);
+            }
+        } finally {
+            closeResources();
+        }
+        return descuentos;
+    }
+
+    /**
+     * Calcula bonos fijos para empleado (actualizado para BigDecimal)
+     */
+    public BigDecimal calcularBonosFijosParaEmpleado(int empleadoId) throws SQLException {
+        BigDecimal totalBonos = BigDecimal.ZERO;
+        try {
+            ps = conn.connect().prepareStatement(
+                    "SELECT b.Valor " +
+                            "FROM AsignacionBono ab " +
+                            "JOIN Bono b ON ab.BonosId = b.Id " +
+                            "WHERE ab.EmpleadosId = ? AND b.Estado = 1 AND b.Operacion = 1"
+            );
+            ps.setInt(1, empleadoId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                totalBonos = totalBonos.add(BigDecimal.valueOf(rs.getDouble("Valor")));
+            }
+        } finally {
+            closeResources();
+        }
+        return totalBonos;
+    }
+
+    /**
+     * Calcula descuentos fijos para empleado (actualizado para BigDecimal)
+     */
+    public BigDecimal calcularDescuentosFijosParaEmpleado(int empleadoId) throws SQLException {
+        BigDecimal totalDescuentos = BigDecimal.ZERO;
+        try {
+            ps = conn.connect().prepareStatement(
+                    "SELECT d.Valor " +
+                            "FROM AsignacionDescuento ad " +
+                            "JOIN Descuento d ON ad.DescuentosId = d.Id " +
+                            "WHERE ad.EmpleadosId = ? AND d.Estado = 1 AND d.Operacion = 1"
+            );
+            ps.setInt(1, empleadoId);
+            rs = ps.executeQuery();
+
+            while (rs.next()) {
+                totalDescuentos = totalDescuentos.add(BigDecimal.valueOf(rs.getDouble("Valor")));
+            }
+        } finally {
+            closeResources();
+        }
+        return totalDescuentos;
     }
 
 
