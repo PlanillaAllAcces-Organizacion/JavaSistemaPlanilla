@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import Grupo05.Utils.CUD;
 
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class EmpleadoReadingForm extends JDialog {
     private JButton btnEliminar;
     private JTable tableEmpleados;
     private JPanel mainPanel;
+    private JLabel lblNombre;
     private JButton button1;
 
     private EmpleadoDAO empleadoDAO; // Instancia de UserDAO para realizar operaciones de base de datos de usuarios.
@@ -28,12 +30,39 @@ public class EmpleadoReadingForm extends JDialog {
         super(mainForm, true);
         this.mainForm = mainForm;
         empleadoDAO = new EmpleadoDAO();
-        setContentPane(mainPanel);
         setModal(true);
         setTitle("Buscar Empleados"); // Título actualizado
         pack();
+        initComponentsManual();
         setLocationRelativeTo(mainForm);
+
+
+    }
+
+    private void initComponentsManual() {
+        mainPanel = new JPanel(new BorderLayout(10, 10));
         setContentPane(mainPanel);
+        setSize(800, 600);
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        topPanel.add(lblNombre);
+        topPanel.add(txtName);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        tableEmpleados.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        mainPanel.add(new JScrollPane(tableEmpleados), BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        bottomPanel.add(btnCrear);
+        bottomPanel.add(btnModificar);
+        bottomPanel.add(btnEliminar);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        btnCrear.setBackground(new Color(34, 139, 34));
+        btnCrear.setForeground(Color.WHITE);
+        btnModificar.setBackground(new Color(153, 102, 255));
+        btnModificar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(new Color(178, 34, 34));
+        btnEliminar.setForeground(Color.WHITE);
 
         // Listener para el campo de búsqueda por nombre/DUI
         txtName.addKeyListener(new KeyAdapter() {

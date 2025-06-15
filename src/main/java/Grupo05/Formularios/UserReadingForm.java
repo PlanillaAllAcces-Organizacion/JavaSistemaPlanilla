@@ -4,6 +4,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import Grupo05.dominio.User;
 import Grupo05.Persistencia.UserDAO;
+
+import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
@@ -16,19 +18,50 @@ public class UserReadingForm extends JDialog {
     private JButton btnEliminar;
     private JTable tblUsuarios;
     private JPanel mainPanel;
+    private JLabel lblUser;
 
     private UserDAO userDAO; // Instancia de UserDAO para realizar operaciones de base de datos de usuarios.
     private MainForm mainForm; // Referencia a la ventana principal de la aplicación.
 
     // Constructor de la clase UserReadingForm. Recibe una instancia de MainForm como parámetro.
     public UserReadingForm(MainForm mainForm) {
+        super(mainForm, true);
         this.mainForm = mainForm; // Asigna la instancia de MainForm recibida a la variable local.
         userDAO = new UserDAO(); // Crea una nueva instancia de UserDAO al instanciar este formulario.
-        setContentPane(mainPanel); // Establece el panel principal como el contenido de este diálogo.
         setModal(true); // Hace que este diálogo sea modal, bloqueando la interacción con la ventana principal hasta que se cierre.
         setTitle("Buscar Usuario"); // Establece el título de la ventana del diálogo.
         pack(); // Ajusta el tamaño de la ventana para que todos sus componentes se muestren correctamente.
+        initComponentsManual();
         setLocationRelativeTo(mainForm); // Centra la ventana del diálogo relative a la ventana principal.
+
+
+
+    }
+
+    public void initComponentsManual(){
+        mainPanel = new JPanel(new BorderLayout(10, 10));
+        setContentPane(mainPanel);
+        setSize(800, 600);
+        JPanel topPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        topPanel.add(lblUser);
+        topPanel.add(txtName);
+
+        mainPanel.add(topPanel, BorderLayout.NORTH);
+        tblUsuarios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        mainPanel.add(new JScrollPane(tblUsuarios), BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
+        bottomPanel.add(btnCrear);
+        bottomPanel.add(btnEditar);
+        bottomPanel.add(btnEliminar);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        btnCrear.setBackground(new Color(34, 139, 34));
+        btnCrear.setForeground(Color.WHITE);
+        btnEditar.setBackground(new Color(153, 102, 255));
+        btnEditar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(new Color(178, 34, 34));
+        btnEliminar.setForeground(Color.WHITE);
 
         // Agrega un listener de teclado al campo de texto txtNombre.
         txtName.addKeyListener(new KeyAdapter() {
@@ -90,6 +123,8 @@ public class UserReadingForm extends JDialog {
             }
         });
     }
+
+
     private void search(String query) {
         try {
             // Llama al método 'search' del UserDAO para buscar usuarios cuya información

@@ -134,6 +134,14 @@ public class PagoEmpleadoForm extends JDialog {
         add(bottomPanel, BorderLayout.SOUTH);
 
 
+        btnGuardarPago.setBackground(new Color(34, 139, 34));
+        btnGuardarPago.setForeground(Color.WHITE);
+        btnCalcularPago.setBackground(new Color(255, 153, 0));
+        btnCalcularPago.setForeground(Color.WHITE);
+        btnLimpiar.setBackground(new Color(0, 102, 204));
+        btnLimpiar.setForeground(Color.WHITE);
+
+
         cbxEmpleados.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
@@ -196,6 +204,8 @@ public class PagoEmpleadoForm extends JDialog {
             case DELETE:
                 setTitle("Eliminar Pago");
                 btnGuardarPago.setText("Confirmar Eliminación");
+                btnGuardarPago.setBackground(new Color(178, 34, 34));
+                btnGuardarPago.setForeground(Color.WHITE);
                 btnLimpiar.setVisible(false);
                 cbxEmpleados.setEnabled(false);
                 setFormEnabled(false);

@@ -92,6 +92,11 @@ public class AsignacionBonosForm extends JDialog {
         panelBotones.add(eliminarAsignacionButton);
         panelInferior.add(panelBotones, BorderLayout.SOUTH);
 
+        asignarBonoButton.setBackground(new Color(34, 139, 34));
+        asignarBonoButton.setForeground(Color.WHITE);
+        eliminarAsignacionButton.setBackground(new Color(178, 34, 34));
+        eliminarAsignacionButton.setForeground(Color.WHITE);
+
         add(panelInferior, BorderLayout.SOUTH);
 
         // Cargar datos iniciales

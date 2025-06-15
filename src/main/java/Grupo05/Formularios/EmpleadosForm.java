@@ -80,6 +80,7 @@ public class EmpleadosForm extends JDialog{
         JPanel topPanel = new JPanel(new GridLayout(6, 2, 10, 10));
         topPanel.setBorder(BorderFactory.createTitledBorder("Crear nuevo empleado"));
 
+
         topPanel.add(lblDUI);
         topPanel.add(txtDui);
         topPanel.add(lblNombre);
@@ -128,6 +129,11 @@ public class EmpleadosForm extends JDialog{
         bottomPanel.add(BtnGuardar);
         bottomPanel.add(BtnCancelar);
         add(bottomPanel, BorderLayout.SOUTH);
+
+        BtnGuardar.setBackground(new Color(34, 139, 34));
+        BtnGuardar.setForeground(Color.WHITE);
+        BtnCancelar.setBackground(new Color(178, 34, 34));
+        BtnCancelar.setForeground(Color.WHITE);
     }
 
     private void addListeners() {

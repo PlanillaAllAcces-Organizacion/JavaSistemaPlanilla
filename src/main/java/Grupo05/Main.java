@@ -14,8 +14,8 @@ public class Main {
             // se realicen de forma segura y sin bloqueos.
             MainForm mainForm  = new MainForm(); // Crea una nueva instancia del formulario principal de la aplicación.
             mainForm.setVisible(true); // Hace visible el formulario principal. Inicialmente podría estar vacío o tener una interfaz de carga.
-            // //LoginForm loginForm = new LoginForm(mainForm);
-            //Hacer visible el formulario login //loginForm.setVisible(true);
+            //LoginForm loginForm = new LoginForm(mainForm);
+            //loginForm.setVisible(true);
         });
     }
 }

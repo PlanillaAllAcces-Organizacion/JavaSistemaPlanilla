@@ -4,12 +4,15 @@ import Grupo05.Persistencia.UserDAO;
 import Grupo05.dominio.User;
 
 import javax.swing.*;
+import java.awt.*;
 
 public class PasswordForm extends JDialog{
     private JTextField txtUsuario;
     private JButton btnCambiar;
     private JPanel mainPanel;
     private JPasswordField txtPasswordH;
+    private JLabel lblUsuario;
+    private JLabel lblPassword;
 
     private UserDAO userDAO;
     private MainForm mainForm;
@@ -20,7 +23,7 @@ public class PasswordForm extends JDialog{
         this.mainForm = mainForm;
         userDAO = new UserDAO();
         txtUsuario.setText(mainForm.getUserAutenticate().getName());
-        setContentPane(mainPanel);
+        init();
         setModal(true); // Hace que este diálogo sea modal, lo que significa que bloquea la interacción con la ventana principal hasta que se cierre.
         setTitle("Cambiar password"); // Establece el título de la ventana del diálogo.
         pack(); // Ajusta el tamaño de la ventana para que todos sus componentes se muestren correctamente.
@@ -30,6 +33,23 @@ public class PasswordForm extends JDialog{
         btnCambiar.addActionListener(e-> changePassword());
 
     }
+
+    private void init() {
+        setContentPane(mainPanel);
+        setLayout(new BorderLayout(10, 10));
+        JPanel topPanel = new JPanel(new GridLayout(5, 4, 5, 5));
+        topPanel.setBorder(BorderFactory.createTitledBorder("Crear nuevo usuario"));
+        topPanel.add(lblUsuario);
+        topPanel.add(txtUsuario);
+        topPanel.add(lblPassword);
+        topPanel.add(txtPasswordH);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
+        bottomPanel.add(btnCambiar);
+        mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+
     private void changePassword() {
 
         try {
@@ -58,7 +78,7 @@ public class PasswordForm extends JDialog{
                 // Si la actualización es exitosa, cierra la ventana actual (ChangePasswordForm).
                 this.dispose();
                 // Crea una nueva instancia de la ventana de inicio de sesión (LoginForm), pasando la ventana principal como parámetro.
-                LoginForm loginForm = new LoginForm(this.mainForm);
+                 LoginForm loginForm = new LoginForm(this.mainForm);
                 // Hace visible la ventana de inicio de sesión.
                 loginForm.setVisible(true); // Muestra la ventana de inicio de sesión para que el usuario pueda ingresar con la nueva contraseña.
             } else {

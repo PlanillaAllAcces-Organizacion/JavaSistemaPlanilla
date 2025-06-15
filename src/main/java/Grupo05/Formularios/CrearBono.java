@@ -134,6 +134,11 @@ public class CrearBono extends JFrame {
         btnConfirmar = new JButton(operacion == CUD.DELETE ? "Eliminar" : "Guardar");
         btnCancelar = new JButton("Cancelar");
 
+        btnConfirmar.setBackground(new Color(34, 139, 34));
+        btnConfirmar.setForeground(Color.WHITE);
+        btnCancelar.setBackground(new Color(178, 34, 34));
+        btnCancelar.setForeground(Color.WHITE);
+
         btnConfirmar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
