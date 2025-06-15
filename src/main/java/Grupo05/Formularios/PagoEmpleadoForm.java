@@ -308,47 +308,33 @@ public class PagoEmpleadoForm extends JDialog {
                 return;
             }
 
-            // Obtener valores base del puesto (ya son BigDecimal)
+            // Obtener valor por hora (ya es BigDecimal)
             BigDecimal valorHora = puestoEmpleadoSeleccionado.getValorxHora();
-            BigDecimal salarioBase = puestoEmpleadoSeleccionado.getSalarioBase();
 
             // Calcular pago bruto (horas * valor hora)
             BigDecimal pagoBruto = valorHora.multiply(new BigDecimal(horasTrabajadas));
 
-            // 1. Calcular bonos fijos
-            BigDecimal totalBonosFijos = pagoEmpleadoDAO.calcularBonosFijosParaEmpleado(empleadoSeleccionado.getId());
+            // Calcular total de bonos (fijos + porcentuales)
+            BigDecimal totalBonos = pagoEmpleadoDAO.calcularTotalBonosParaEmpleado(
+                    empleadoSeleccionado.getId(),
+                    pagoBruto
+            );
 
-            // 2. Calcular descuentos fijos
-            BigDecimal totalDescuentosFijos = pagoEmpleadoDAO.calcularDescuentosFijosParaEmpleado(empleadoSeleccionado.getId());
+            // Calcular total de descuentos (fijos + porcentuales)
+            BigDecimal totalDescuentos = pagoEmpleadoDAO.calcularTotalDescuentosParaEmpleado(
+                    empleadoSeleccionado.getId(),
+                    pagoBruto
+            );
 
-            // 3. Calcular bonos no fijos (porcentajes)
-            BigDecimal totalBonosNoFijos = BigDecimal.ZERO;
-            List<Bonos> bonosNoFijos = pagoEmpleadoDAO.obtenerBonosNoFijos(empleadoSeleccionado.getId());
-            for (Bonos bono : bonosNoFijos) {
-                BigDecimal porcentaje = new BigDecimal(bono.getValor()).divide(new BigDecimal(100));
-                totalBonosNoFijos = totalBonosNoFijos.add(pagoBruto.multiply(porcentaje));
-            }
-
-            // 4. Calcular descuentos no fijos (porcentajes)
-            BigDecimal totalDescuentosNoFijos = BigDecimal.ZERO;
-            List<Descuentos> descuentosNoFijos = pagoEmpleadoDAO.obtenerDescuentosNoFijos(empleadoSeleccionado.getId());
-            for (Descuentos descuento : descuentosNoFijos) {
-                BigDecimal porcentaje = new BigDecimal(descuento.getValor()).divide(new BigDecimal(100));
-                totalDescuentosNoFijos = totalDescuentosNoFijos.add(pagoBruto.multiply(porcentaje));
-            }
-
-            // Calcular pago total
-            BigDecimal pagoTotal = pagoBruto
-                    .add(salarioBase)
-                    .add(totalBonosFijos)
-                    .add(totalBonosNoFijos)
-                    .subtract(totalDescuentosFijos)
-                    .subtract(totalDescuentosNoFijos);
+            // Calcular pago neto (pago bruto + bonos - descuentos)
+            BigDecimal pagoNeto = pagoBruto
+                    .add(totalBonos)
+                    .subtract(totalDescuentos);
 
             // Mostrar resultados
-            txtBonos.setText(totalBonosFijos.add(totalBonosNoFijos).toString());
-            txtDescuentos.setText(totalDescuentosFijos.add(totalDescuentosNoFijos).toString());
-            txtPagoTotal.setText(pagoTotal.toString());
+            txtBonos.setText(totalBonos.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+            txtDescuentos.setText(totalDescuentos.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
+            txtPagoTotal.setText(pagoNeto.setScale(2, BigDecimal.ROUND_HALF_UP).toString());
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this,
@@ -366,7 +352,6 @@ public class PagoEmpleadoForm extends JDialog {
             ex.printStackTrace();
         }
     }
-
     private void guardarActualizarEliminarPago() {
         if (currentCUDMode == CUD.DELETE) {
             performDelete();

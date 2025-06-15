@@ -358,51 +358,79 @@ public class PagoEmpleadoDAO {
     }
 
     /**
-     * Calcula bonos fijos para empleado (actualizado para BigDecimal)
+     * Calcula descuentos para empleado considerando fijos y no fijos
      */
-    public BigDecimal calcularBonosFijosParaEmpleado(int empleadoId) throws SQLException {
-        BigDecimal totalBonos = BigDecimal.ZERO;
-        try {
-            ps = conn.connect().prepareStatement(
-                    "SELECT b.Valor " +
-                            "FROM AsignacionBono ab " +
-                            "JOIN Bono b ON ab.BonosId = b.Id " +
-                            "WHERE ab.EmpleadosId = ? AND b.Estado = 1 AND b.Operacion = 1"
-            );
-            ps.setInt(1, empleadoId);
-            rs = ps.executeQuery();
-
-            while (rs.next()) {
-                totalBonos = totalBonos.add(BigDecimal.valueOf(rs.getDouble("Valor")));
-            }
-        } finally {
-            closeResources();
-        }
-        return totalBonos;
-    }
-
-    /**
-     * Calcula descuentos fijos para empleado (actualizado para BigDecimal)
-     */
-    public BigDecimal calcularDescuentosFijosParaEmpleado(int empleadoId) throws SQLException {
+    public BigDecimal calcularTotalDescuentosParaEmpleado(int empleadoId, BigDecimal pagoBruto) throws SQLException {
         BigDecimal totalDescuentos = BigDecimal.ZERO;
-        try {
-            ps = conn.connect().prepareStatement(
-                    "SELECT d.Valor " +
-                            "FROM AsignacionDescuento ad " +
-                            "JOIN Descuento d ON ad.DescuentosId = d.Id " +
-                            "WHERE ad.EmpleadosId = ? AND d.Estado = 1 AND d.Operacion = 1"
-            );
+
+        // Descuentos fijos (Operacion = 1)
+        try (PreparedStatement ps = conn.connect().prepareStatement(
+                "SELECT d.Valor FROM AsignacionDescuento ad " +
+                        "JOIN Descuento d ON ad.DescuentosId = d.Id " +
+                        "WHERE ad.EmpleadosId = ? AND d.Estado = 1 AND d.Operacion = 1")) {
+
             ps.setInt(1, empleadoId);
-            rs = ps.executeQuery();
+            ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
                 totalDescuentos = totalDescuentos.add(BigDecimal.valueOf(rs.getDouble("Valor")));
             }
-        } finally {
-            closeResources();
         }
+
+        // Descuentos no fijos (Operacion = 0 - porcentuales)
+        try (PreparedStatement ps = conn.connect().prepareStatement(
+                "SELECT d.Valor FROM AsignacionDescuento ad " +
+                        "JOIN Descuento d ON ad.DescuentosId = d.Id " +
+                        "WHERE ad.EmpleadosId = ? AND d.Estado = 1 AND d.Operacion = 0")) {
+
+            ps.setInt(1, empleadoId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                BigDecimal porcentaje = BigDecimal.valueOf(rs.getDouble("Valor")).divide(BigDecimal.valueOf(100));
+                totalDescuentos = totalDescuentos.add(pagoBruto.multiply(porcentaje));
+            }
+        }
+
         return totalDescuentos;
+    }
+
+    /**
+     * Calcula bonos para empleado considerando fijos y no fijos
+     */
+    public BigDecimal calcularTotalBonosParaEmpleado(int empleadoId, BigDecimal pagoBruto) throws SQLException {
+        BigDecimal totalBonos = BigDecimal.ZERO;
+
+        // Bonos fijos (Operacion = 1)
+        try (PreparedStatement ps = conn.connect().prepareStatement(
+                "SELECT b.Valor FROM AsignacionBono ab " +
+                        "JOIN Bono b ON ab.BonosId = b.Id " +
+                        "WHERE ab.EmpleadosId = ? AND b.Estado = 1 AND b.Operacion = 1")) {
+
+            ps.setInt(1, empleadoId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                totalBonos = totalBonos.add(BigDecimal.valueOf(rs.getDouble("Valor")));
+            }
+        }
+
+        // Bonos no fijos (Operacion = 0 - porcentuales)
+        try (PreparedStatement ps = conn.connect().prepareStatement(
+                "SELECT b.Valor FROM AsignacionBono ab " +
+                        "JOIN Bono b ON ab.BonosId = b.Id " +
+                        "WHERE ab.EmpleadosId = ? AND b.Estado = 1 AND b.Operacion = 0")) {
+
+            ps.setInt(1, empleadoId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                BigDecimal porcentaje = BigDecimal.valueOf(rs.getDouble("Valor")).divide(BigDecimal.valueOf(100));
+                totalBonos = totalBonos.add(pagoBruto.multiply(porcentaje));
+            }
+        }
+
+        return totalBonos;
     }
 
 
