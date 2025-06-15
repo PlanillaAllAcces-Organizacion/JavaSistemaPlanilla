@@ -59,6 +59,18 @@ public class BonoListForm extends JFrame {
         btnDelete = new JButton("Eliminar");
         btnRefresh = new JButton("Actualizar");
 
+        btnNew.setBackground(new Color(34, 139, 34));
+        btnNew.setForeground(Color.WHITE);
+        btnEdit.setBackground(new Color(153, 102, 255));
+        btnEdit.setForeground(Color.WHITE);
+        btnRefresh.setBackground(new Color(0, 102, 204));
+        btnRefresh.setForeground(Color.WHITE);
+        btnDelete.setBackground(new Color(178, 34, 34));
+        btnDelete.setForeground(Color.WHITE);
+        btnSearch.setForeground(Color.WHITE);
+        btnSearch.setBackground(new Color(255, 153, 0));
+
+
         // Configurar acciones
         btnNew.addActionListener(e -> new CrearBono(CUD.CREATE).setVisible(true));
         btnEdit.addActionListener(e -> editarBono());

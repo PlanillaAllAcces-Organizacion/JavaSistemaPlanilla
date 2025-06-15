@@ -89,6 +89,11 @@ public class AsignacionDescuentoForm extends JDialog{
         panelBotones.add(eliminarAsignaciónButton);
         panelInferior.add(panelBotones, BorderLayout.SOUTH);
 
+        asignarDescuentoButton.setBackground(new Color(34, 139, 34));
+        asignarDescuentoButton.setForeground(Color.WHITE);
+        eliminarAsignaciónButton.setBackground(new Color(178, 34, 34));
+        eliminarAsignaciónButton.setForeground(Color.WHITE);
+
         add(panelInferior, BorderLayout.SOUTH);
 
         // Cargar datos iniciales

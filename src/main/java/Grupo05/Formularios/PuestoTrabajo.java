@@ -72,6 +72,8 @@ public class PuestoTrabajo extends JDialog {
         // Configurar estilos de botones
         btnGuardar.setBackground(new Color(34, 139, 34));
         btnGuardar.setForeground(Color.WHITE);
+        btnLimpiar.setBackground(new Color(0, 102, 204));
+        btnLimpiar.setForeground(Color.WHITE);
         btnCancelar.setBackground(new Color(178, 34, 34));
         btnCancelar.setForeground(Color.WHITE);
     }

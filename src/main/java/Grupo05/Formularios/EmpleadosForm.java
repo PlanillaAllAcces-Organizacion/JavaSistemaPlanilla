@@ -10,12 +10,17 @@ import Grupo05.dominio.Empleado;
 import Grupo05.dominio.PuestoTrabajo;
 import Grupo05.dominio.Horario;
 
+import java.awt.*;
 import java.sql.SQLException;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class EmpleadosForm extends JDialog{
     private JTextField txtDui;
@@ -32,6 +37,16 @@ public class EmpleadosForm extends JDialog{
     private JComboBox cbEstado;
     private JComboBox cbPuesto;
     private JComboBox cbHorario;
+    private JLabel lblDUI;
+    private JLabel lblNombre;
+    private JLabel lblApellido;
+    private JLabel lblCorreo;
+    private JLabel lblTelefono;
+    private JLabel lblSalario;
+    private JLabel lblEstado;
+    private JLabel lblHorario;
+    private JLabel lblPuesto;
+    private JLabel lblFecha;
 
 
     private EmpleadoDAO empleadoDAO; // Instancia de EmpleadoDAO
@@ -42,17 +57,17 @@ public class EmpleadosForm extends JDialog{
     private PuestoTrabajoDAO puestoTrabajoDAO; // Declarado aquí
 
     public EmpleadosForm(MainForm mainForm, CUD cud, Empleado empleado){
+        super(mainForm, true);
         this.cud = cud;
         this.en = empleado;
-        this.mainForm = mainForm;
 
         empleadoDAO = new EmpleadoDAO();
         puestoTrabajoDAO = new PuestoTrabajoDAO();
         tipoHorarioDAO = new TipoHorarioDAO();
-        setContentPane(mainPanel);
         setModal(true);
         init();
         pack();
+        addListeners();
         setLocationRelativeTo(mainForm);
 
         BtnCancelar.addActionListener(s -> this.dispose());
@@ -60,6 +75,36 @@ public class EmpleadosForm extends JDialog{
     }
 
     private void init() {
+        setLayout(new BorderLayout(10, 10));
+
+        JPanel topPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        topPanel.setBorder(BorderFactory.createTitledBorder("Crear nuevo empleado"));
+
+
+        topPanel.add(lblDUI);
+        topPanel.add(txtDui);
+        topPanel.add(lblNombre);
+        topPanel.add(txtNombre);
+        topPanel.add(lblApellido);
+        topPanel.add(txtApellido);
+        topPanel.add(lblCorreo);
+        topPanel.add(txtCorreo);
+        topPanel.add(lblTelefono);
+        topPanel.add(txtTelefono);
+        topPanel.add(lblSalario);
+        topPanel.add(txtSalario);
+        txtSalario.setEditable(false);
+        topPanel.add(lblEstado);
+        topPanel.add(cbEstado);
+        topPanel.add(lblHorario);
+        topPanel.add(cbHorario);
+        topPanel.add(lblPuesto);
+        topPanel.add(cbPuesto);
+        topPanel.add(lblFecha);
+        topPanel.add(txtFecha);
+        txtFecha.setEditable(false);
+        add(topPanel, BorderLayout.NORTH);
+
         initCBEstado(); // Inicializa el ComboBox de estado
         initCBsAdicionales(); // Inicializa los ComboBoxes adicionales
 
@@ -79,13 +124,49 @@ public class EmpleadosForm extends JDialog{
         }
 
         setValuesControls(this.en); // Llena los campos con los valores del empleado
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        bottomPanel.add(BtnGuardar);
+        bottomPanel.add(BtnCancelar);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        BtnGuardar.setBackground(new Color(34, 139, 34));
+        BtnGuardar.setForeground(Color.WHITE);
+        BtnCancelar.setBackground(new Color(178, 34, 34));
+        BtnCancelar.setForeground(Color.WHITE);
     }
+
+    private void addListeners() {
+        // *** LÓGICA CLAVE: Listener para cbPuesto para actualizar el salario ***
+        cbPuesto.addActionListener(e -> {
+            ComBo selectedPuesto = (ComBo) cbPuesto.getSelectedItem();
+            if (selectedPuesto != null) {
+                try {
+                    // Obtener los detalles completos del puesto de trabajo usando su ID
+                    PuestoTrabajo puesto = puestoTrabajoDAO.getById((int) selectedPuesto.getValue());
+                    if (puesto != null) {
+                        txtSalario.setText(String.format(Locale.getDefault(), "%.2f", puesto.getSalarioBase()));
+                    } else {
+                        txtSalario.setText(""); // Limpiar si el puesto no se encuentra
+                    }
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(this,
+                            "Error al cargar el salario del puesto: " + ex.getMessage(),
+                            "Error de Datos", JOptionPane.ERROR_MESSAGE);
+                    txtSalario.setText(""); // Limpiar en caso de error
+                }
+            } else {
+                txtSalario.setText(""); // Limpiar si no hay nada seleccionado
+            }
+        });
+    }
+
 
     private void initCBsAdicionales() {
         // --- ComboBox Tipo de Horario ---
-        DefaultComboBoxModel<ComBo> modelHorario = (DefaultComboBoxModel<ComBo>) cbHorario.getModel();
-        modelHorario.removeAllElements(); // Limpiar elementos previos por si acaso
-
+        DefaultComboBoxModel<ComBo> modelHorario = new DefaultComboBoxModel<>();
+        // *** AGREGADO: Opción "Seleccione" al inicio ***
+        modelHorario.addElement(new ComBo("Seleccione", 0)); // Valor 0 para indicar que no hay selección válida
         try {
             ArrayList<Horario> horarios = tipoHorarioDAO.getAll();
             for (Horario h : horarios) {
@@ -96,11 +177,12 @@ public class EmpleadosForm extends JDialog{
                     "Error al cargar tipos de horario: " + ex.getMessage(),
                     "Error de Carga", JOptionPane.ERROR_MESSAGE);
         }
+        cbHorario.setModel(modelHorario);
 
         // --- ComboBox Puesto de Trabajo ---
-        DefaultComboBoxModel<ComBo> modelPuesto = (DefaultComboBoxModel<ComBo>) cbPuesto.getModel();
-        modelPuesto.removeAllElements(); // Limpiar elementos previos
-
+        DefaultComboBoxModel<ComBo> modelPuesto = new DefaultComboBoxModel<>();
+        // *** AGREGADO: Opción "Seleccione" al inicio ***
+        modelPuesto.addElement(new ComBo("Seleccione", 0)); // Valor 0 para indicar que no hay selección válida
         try {
             ArrayList<PuestoTrabajo> puestos = puestoTrabajoDAO.getAllActive();
             for (PuestoTrabajo p : puestos) {
@@ -111,6 +193,7 @@ public class EmpleadosForm extends JDialog{
                     "Error al cargar puestos de trabajo: " + ex.getMessage(),
                     "Error de Carga", JOptionPane.ERROR_MESSAGE);
         }
+        cbPuesto.setModel(modelPuesto);
     }
 
     private void initCBEstado() {
@@ -131,7 +214,7 @@ public class EmpleadosForm extends JDialog{
         txtDui.setText(empleado.getDui());
         txtTelefono.setText(String.valueOf(empleado.getTelefono()));
         txtCorreo.setText(empleado.getCorreo());
-        txtSalario.setText(String.valueOf(empleado.getSalario()));
+        txtSalario.setText(String.format(Locale.getDefault(), "%.2f",empleado.getSalario()));
 
         // Manejo de la fecha de contrato
         if (this.cud == CUD.CREATE) {
@@ -214,16 +297,28 @@ public class EmpleadosForm extends JDialog{
             return false;
         }
 
-        // Validación y parseo de Salario
+
         double salario;
         try {
-            salario = Double.parseDouble(txtSalario.getText().trim());
+            // Configurar DecimalFormatSymbols para usar la coma como separador decimal
+            DecimalFormatSymbols symbols = new DecimalFormatSymbols(Locale.getDefault());
+            symbols.setDecimalSeparator(','); // Forzar la coma
+            symbols.setGroupingSeparator('.'); // Opcional: si usas el punto como separador de miles (ej: 1.234,56)
+
+            // Crear un DecimalFormat con los símbolos personalizados
+            DecimalFormat format = new DecimalFormat("#,##0.00", symbols);
+            format.setParseBigDecimal(true); // Esto es útil para manejar grandes números con precisión si es necesario.
+
+            // Parsear el texto del salario usando el formato configurado
+            Number parsedNumber = format.parse(txtSalario.getText().trim());
+            salario = parsedNumber.doubleValue(); // Obtener el valor double
+
             if (salario <= 0) {
                 JOptionPane.showMessageDialog(null, "El salario debe ser un número válido y positivo.", "Validación", JOptionPane.WARNING_MESSAGE);
                 return false;
             }
-        } catch (NumberFormatException e) {
-            JOptionPane.showMessageDialog(null, "El salario debe ser un número decimal válido.", "Validación", JOptionPane.WARNING_MESSAGE);
+        } catch (ParseException | NumberFormatException e) { // Atrapar ParseException ahora también
+            JOptionPane.showMessageDialog(null, "El salario debe ser un número decimal válido (ej: 123,45 o 123.45).", "Validación", JOptionPane.WARNING_MESSAGE);
             return false;
         }
 

@@ -125,6 +125,15 @@ public class PagoEmpleadoReadingForm extends JDialog {
         bottomPanel.add(btnModificar);
         bottomPanel.add(btnEliminar);
         mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+
+        btnCrear.setBackground(new Color(34, 139, 34));
+        btnCrear.setForeground(Color.WHITE);
+        btnModificar.setBackground(new Color(153, 102, 255));
+        btnModificar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(new Color(178, 34, 34));
+        btnEliminar.setForeground(Color.WHITE);
+        btnBuscar.setForeground(Color.WHITE);
+        btnBuscar.setBackground(new Color(255, 153, 0));
     }
 
     private void searchPagosByDateRange() {

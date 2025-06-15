@@ -44,10 +44,10 @@ public class TipoDeHorarioListForm extends JFrame {
         tblHorarios = new JTable();
         tblHorarios.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        btnNuevo = createStyledButton("Nuevo", new Color(0, 102, 204));
-        btnEditar = createStyledButton("Editar", new Color(0, 153, 51));
+        btnActualizar = createStyledButton("Nuevo", new Color(0, 102, 204));
+        btnNuevo = createStyledButton("Editar", new Color(0, 153, 51));
         btnEliminar = createStyledButton("Eliminar", new Color(204, 0, 0));
-        btnActualizar = createStyledButton("Actualizar", new Color(153, 102, 255));
+        btnEditar = createStyledButton("Actualizar", new Color(153, 102, 255));
         btnBuscar = createStyledButton("Buscar", new Color(255, 153, 0));
 
         txtBusqueda = new JTextField(20);

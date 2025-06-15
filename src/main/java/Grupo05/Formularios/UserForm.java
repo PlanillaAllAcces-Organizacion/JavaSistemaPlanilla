@@ -8,6 +8,7 @@ import Grupo05.Utils.CUD; // Importa el enum CUD (Create, Update, Delete),  para
 
 import Grupo05.dominio.User;
 
+import java.awt.*;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
@@ -21,6 +22,9 @@ public class UserForm extends JDialog {
     private JButton btnCancelar;
     private JPanel mainPanel;
     private JLabel lbPassword;
+    private JLabel lblUsuario;
+    private JLabel lblFecha;
+    private JLabel lblEstado;
 
 
     private UserDAO userDAO; // Instancia de la clase UserDAO para interactuar con la base de datos de usuarios.
@@ -49,6 +53,31 @@ public class UserForm extends JDialog {
     }
 
     private void init() {
+        setLayout(new BorderLayout(10, 10));
+
+        JPanel topPanel = new JPanel(new GridLayout(6, 2, 10, 10));
+        topPanel.setBorder(BorderFactory.createTitledBorder("Crear nuevo usuario"));
+        topPanel.add(lblUsuario);
+        topPanel.add(txtName);
+        topPanel.add(lbPassword);
+        topPanel.add(txtPassword);
+        topPanel.add(lblFecha);
+        topPanel.add(txtFecha);
+        txtFecha.setEditable(false);
+        topPanel.add(lblEstado);
+        topPanel.add(cmbEstado);
+        add(topPanel, BorderLayout.NORTH);
+
+        JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 5, 5));
+        bottomPanel.add(btnGuardar);
+        bottomPanel.add(btnCancelar);
+        add(bottomPanel, BorderLayout.SOUTH);
+
+        btnGuardar.setBackground(new Color(34, 139, 34));
+        btnGuardar.setForeground(Color.WHITE);
+        btnCancelar.setBackground(new Color(178, 34, 34));
+        btnCancelar.setForeground(Color.WHITE);
+
         // Inicializa el ComboBox de estatus (cbEstatus) con las opciones correspondientes.
         initCBStatus();
 
@@ -72,6 +101,7 @@ public class UserForm extends JDialog {
                 // Establece el texto del botón de acción principal (btnOk) como "Eliminar".
                 btnGuardar.setText("Eliminar");
                 break;
+
         }
 
         // Llama al método 'setValuesControls' para llenar los campos del formulario

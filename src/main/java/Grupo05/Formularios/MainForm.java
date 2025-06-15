@@ -3,6 +3,8 @@ package Grupo05.Formularios;
 import javax.swing.*;
 import Grupo05.dominio.User;
 
+import java.awt.event.ActionListener;
+
 public class MainForm extends JFrame {
 
     private User userAutenticate;
@@ -24,98 +26,109 @@ public class MainForm extends JFrame {
     }
 
     private void createMenu() {
-        // Barra de menú
-        JMenuBar menuBar = new JMenuBar(); // Crea una nueva barra de menú.
-        setJMenuBar(menuBar); // Establece la barra de menú creada como la barra de menú de este JFrame (MainForm).
+        JMenuBar menuBar = new JMenuBar();
+        setJMenuBar(menuBar);
 
-        JMenu menuPerfil = new JMenu("Perfil"); // Crea un nuevo menú llamado "Perfil".
-        menuBar.add(menuPerfil); // Agrega el menú "Perfil" a la barra de menú.
+        // Build "Perfil" menu
+        buildProfileMenu(menuBar);
 
-        JMenuItem itemChangePassword = new JMenuItem("Cambiar contraseña"); // Crea un nuevo elemento de menú llamado "Cambiar contraseña".
-        menuPerfil.add(itemChangePassword); // Agrega el elemento "Cambiar contraseña" al menú "Perfil".
-        itemChangePassword.addActionListener(e -> { // Agrega un ActionListener al elemento "Cambiar contraseña".
-            PasswordForm changePassword = new PasswordForm(this); // Cuando se hace clic, crea una nueva instancia de ChangePasswordForm, pasándole la instancia actual de MainForm como padre.
-            changePassword.setVisible(true); // Hace visible la ventana de cambio de contraseña.
+        // Build "Mantenimientos" menu
+        buildMaintenanceMenu(menuBar);
 
+        // Build "Transacciones" menu (New, for payments and assignments)
+        buildTransactionMenu(menuBar);
+    }
+
+    private void buildProfileMenu(JMenuBar menuBar) {
+        JMenu menuPerfil = new JMenu("Perfil");
+        menuBar.add(menuPerfil);
+
+        JMenuItem itemChangePassword = new JMenuItem("Cambiar contraseña");
+        menuPerfil.add(itemChangePassword);
+        itemChangePassword.addActionListener(e -> {
+            PasswordForm changePasswordForm = new PasswordForm(this);
+            changePasswordForm.setVisible(true);
         });
 
-        JMenuItem itemSalir = new JMenuItem("Salir"); // Crea un nuevo elemento de menú llamado "Salir".
-        menuPerfil.add(itemSalir); // Agrega el elemento "Salir" al menú "Perfil".
-        itemSalir.addActionListener(e -> System.exit(0)); // Agrega un ActionListener al elemento "Salir". Cuando se hace clic, termina la ejecución de la aplicación (cierra la JVM).
+        JMenuItem itemExit = new JMenuItem("Salir");
+        menuPerfil.add(itemExit);
+        itemExit.addActionListener(e -> System.exit(0));
+    }
 
+    private void buildMaintenanceMenu(JMenuBar menuBar) {
+        JMenu menuMantenimiento = new JMenu("Mantenimientos");
+        menuBar.add(menuMantenimiento);
 
-        // Menú "Matenimiento"
-        JMenu menuMantenimiento = new JMenu("Mantenimientos"); // Crea un nuevo menú llamado "Mantenimientos".
-        menuBar.add(menuMantenimiento); // Agrega el menú "Mantenimientos" a la barra de menú.
-
-        JMenuItem itemUsers = new JMenuItem("Usuarios"); // Crea un nuevo elemento de menú llamado "Usuarios".
-        menuMantenimiento.add(itemUsers); // Agrega el elemento "Usuarios" al menú "Mantenimientos".
-        itemUsers.addActionListener(e -> { // Agrega un ActionListener al elemento "Usuarios".
-            UserReadingForm userReadingForm = new UserReadingForm(this); // Cuando se hace clic, crea una nueva instancia de UserReadingForm (formulario para leer/listar usuarios), pasándole la instancia actual de MainForm como padre.
-            userReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
+        addMenuItem(menuMantenimiento, "Usuarios", e -> {
+            UserReadingForm userReadingForm = new UserReadingForm(this);
+            userReadingForm.setVisible(true);
         });
 
-        JMenuItem itemEmpleados = new JMenuItem("Empleados"); // Crea un nuevo elemento de menú llamado "Empleados".
-        menuMantenimiento.add(itemEmpleados); // Agrega el elemento "Usuarios" al menú "Mantenimientos".
-        itemEmpleados.addActionListener(e -> { // Agrega un ActionListener al elemento "Usuarios".
-            EmpleadoReadingForm empleadoReadingForm = new EmpleadoReadingForm(this); // Cuando se hace clic, crea una nueva instancia de UserReadingForm (formulario para leer/listar usuarios), pasándole la instancia actual de MainForm como padre.
-            empleadoReadingForm.setVisible(true); // Hace visible el formulario de lectura de usuarios.
+        addMenuItem(menuMantenimiento, "Empleados", e -> {
+            EmpleadoReadingForm empleadoReadingForm = new EmpleadoReadingForm(this);
+            empleadoReadingForm.setVisible(true);
         });
 
-        // Nuevo ítem para Bonos
-        JMenuItem itemBonos = new JMenuItem("Bonos"); // Crea un nuevo elemento de menú llamado "Bonos".
-        menuMantenimiento.add(itemBonos); // Agrega el elemento "Bonos" al menú "Mantenimientos".
-        itemBonos.addActionListener(e -> { // Agrega un ActionListener al elemento "Bonos".
-            BonoListForm bonoListForm = new BonoListForm(); // Crea una nueva instancia de BonoListForm
-            bonoListForm.setVisible(true); // Hace visible el formulario de gestión de bonos
+        menuMantenimiento.addSeparator(); // Separator for better grouping
+
+        addMenuItem(menuMantenimiento, "Bonos", e -> {
+            BonoListForm bonoListForm = new BonoListForm();
+            bonoListForm.setVisible(true);
         });
 
-        JMenuItem ítemDescuentos = new JMenuItem("Descuentos");
-        menuMantenimiento.add(ítemDescuentos);
-        ítemDescuentos.addActionListener(e -> {
+        addMenuItem(menuMantenimiento, "Descuentos", e -> {
             DescuentoListForm descuentoListForm = new DescuentoListForm();
             descuentoListForm.setVisible(true);
         });
 
-        JMenuItem ítemPuesto = new JMenuItem("Puesto de trabajo");
-        menuMantenimiento.add(ítemPuesto);
-        ítemPuesto.addActionListener(e -> {
-            PuestosTrabajoListForm puestoTrabajoList = new PuestosTrabajoListForm();
-            puestoTrabajoList.setVisible(true);
+        menuMantenimiento.addSeparator(); // Separator for better grouping
+
+        addMenuItem(menuMantenimiento, "Puesto de Trabajo", e -> {
+            PuestosTrabajoListForm puestoTrabajoListForm = new PuestosTrabajoListForm();
+            puestoTrabajoListForm.setVisible(true);
         });
 
-        JMenuItem ítemHorario = new JMenuItem("Horario");
-        menuMantenimiento.add(ítemHorario);
-        ítemHorario.addActionListener(e -> {
-            TipoDeHorarioListForm descuentoListForm = new TipoDeHorarioListForm();
-            descuentoListForm.setVisible(true);
+        addMenuItem(menuMantenimiento, "Tipo de Horario", e -> {
+            TipoDeHorarioListForm tipoDeHorarioListForm = new TipoDeHorarioListForm();
+            tipoDeHorarioListForm.setVisible(true);
         });
+    }
 
-        JMenuItem ítemAsingacionB = new JMenuItem("Asignar Bonos");
-        menuMantenimiento.add(ítemAsingacionB);
-        ítemAsingacionB.addActionListener(e -> {
+    private void buildTransactionMenu(JMenuBar menuBar) {
+        JMenu menuTransacciones = new JMenu("Transacciones");
+        menuBar.add(menuTransacciones);
+
+        addMenuItem(menuTransacciones, "Asignar Bonos", e -> {
             AsignacionBonosForm asignacionBonosForm = new AsignacionBonosForm(this);
             asignacionBonosForm.setVisible(true);
         });
 
-        JMenuItem ítemAsingacionD = new JMenuItem("Asignar Descuentoss");
-        menuMantenimiento.add(ítemAsingacionD);
-        ítemAsingacionD.addActionListener(e -> {
+        addMenuItem(menuTransacciones, "Asignar Descuentos", e -> {
             AsignacionDescuentoForm asignacionDescuentoForm = new AsignacionDescuentoForm(this);
             asignacionDescuentoForm.setVisible(true);
         });
 
-        JMenuItem ítemPago = new JMenuItem("Pago");
-        menuMantenimiento.add(ítemPago);
-        ítemPago.addActionListener(e -> {
-            JFrame dummyParentFrame = new JFrame();
-            PagoEmpleadoReadingForm PagoEmpleadoReading = new PagoEmpleadoReadingForm(dummyParentFrame);
-            dummyParentFrame.setSize(600, 400);
+        menuTransacciones.addSeparator();
+
+        addMenuItem(menuTransacciones, "Gestión de Pagos", e -> {
+            // It's generally not good practice to create a dummy JFrame just for a parent.
+            // If PagoEmpleadoReadingForm truly needs a JFrame parent, consider passing `this` (MainForm)
+            // or refactor PagoEmpleadoReadingForm to not strictly require a JFrame parent
+            // if it's meant to be a standalone dialog.
+            // For now, I'm keeping your original logic with a comment.
+            JFrame dummyParentFrame = new JFrame(); // Consider if this is the best approach
+            PagoEmpleadoReadingForm pagoEmpleadoReadingForm = new PagoEmpleadoReadingForm(dummyParentFrame);
+            dummyParentFrame.setSize(600, 400); // These settings apply to the dummy frame, not the dialog
             dummyParentFrame.setLocationRelativeTo(null);
-            dummyParentFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-            PagoEmpleadoReading.setVisible(true);
+            dummyParentFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE); // Use DISPOSE_ON_CLOSE for temporary frames
+            pagoEmpleadoReadingForm.setVisible(true);
         });
+    }
 
 
+    private void addMenuItem(JMenu menu, String text, ActionListener actionListener) {
+        JMenuItem menuItem = new JMenuItem(text);
+        menu.add(menuItem);
+        menuItem.addActionListener(actionListener);
     }
 }

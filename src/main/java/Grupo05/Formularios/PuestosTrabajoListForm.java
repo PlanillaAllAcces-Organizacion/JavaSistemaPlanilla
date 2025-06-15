@@ -27,8 +27,6 @@ public class PuestosTrabajoListForm extends JFrame {
         setupListeners();
 
         loadPuestosData();
-
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setSize(800, 600);
         setLocationRelativeTo(null);
     }
@@ -52,6 +50,15 @@ public class PuestosTrabajoListForm extends JFrame {
         buttonPanel.add(btnEditar);
         buttonPanel.add(btnEliminar);
         buttonPanel.add(btnActualizar);
+
+        btnNuevo.setBackground(new Color(34, 139, 34));
+        btnNuevo.setForeground(Color.WHITE);
+        btnEditar.setBackground(new Color(153, 102, 255));
+        btnEditar.setForeground(Color.WHITE);
+        btnActualizar.setBackground(new Color(0, 102, 204));
+        btnActualizar.setForeground(Color.WHITE);
+        btnEliminar.setBackground(new Color(178, 34, 34));
+        btnEliminar.setForeground(Color.WHITE);
 
         mainPanel.add(scrollPane, BorderLayout.CENTER);
         mainPanel.add(buttonPanel, BorderLayout.SOUTH);
